@@ -10,7 +10,7 @@ For colour blindness, turn on **Colour-safe colours** in [Preferences → Appear
 
 - **Outline:** `Ctrl+B` shows the document's headings. Click one to jump to it.
 - **Go to a file or heading:** `Ctrl+K`.
-- **Find:** `Ctrl+F`.
+- **Find:** `Ctrl+F`, type what you're looking for, then press `Enter`. `Enter` goes to the next match and `Shift+Enter` to the one before. `Esc` closes it.
 - **Tabs:** every file opens in a tab. Right-click a tab for more choices.
 - **Split view:** `Ctrl+\` shows two documents side by side.
 

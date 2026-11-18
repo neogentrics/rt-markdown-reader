@@ -4,6 +4,11 @@ All notable changes to RT Markdown Reader (Neo Markdown Reader until 3.4.1) are 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- **Find in a document.** *Find* (`Ctrl+F`) no longer freezes while you type. It waits until you press `Enter`, then jumps to the first match and scrolls to it. `Enter` and `Shift+Enter` move between matches, and the current one is marked. It also no longer counts the word in the find box as a match, so a word that isn't in the document now says "No results". On a very large document, a short word that appears thousands of times is about seven times quicker.
+
 ## [3.10.0] - 2026-11-05
 
 Send finished writing where people will read it.

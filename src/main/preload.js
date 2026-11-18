@@ -67,8 +67,6 @@ contextBridge.exposeInMainWorld('reader', {
   setSettings: invoke('settings:set'),
   clearRecent: invoke('recent:clear'),
   // find
-  find: invoke('find:start'),
-  stopFind: invoke('find:stop'),
   // editing (every write is checked and performed by the main process)
   requestEdit: invoke('edit:request'),
   save: invoke('doc:save'),
@@ -220,6 +218,5 @@ contextBridge.exposeInMainWorld('reader', {
   onError: on('doc:error'),
   onSettings: on('settings:changed'),
   onCommand: on('menu:command'),
-  onFindResult: on('find:result'),
   onUpdate: on('update:status'),
 });

@@ -6,6 +6,7 @@ import { createSidebar } from './sidebar.js';
 import { createPalette } from './palette.js';
 import { createSplit } from './split.js';
 import { createHighlights } from './highlights.js';
+import { createFind } from './find.js';
 import { compareDocs } from './compare.js';
 import { createPublish } from './publish-ui.js';
 import { createPresenter } from './present.js';
@@ -599,6 +600,7 @@ els.tocFilter.addEventListener('input', () => {
 
 /** The scrolling pane a tab is shown in (left desk, or the right pane in split view). */
 const deskFor = (tab) => (split?.rightTab() === tab ? split.pane : els.desk);
+const find = createFind({ els, activeTab, deskFor, reveal: (el, tab) => readUi?.reveal(el, tab) });
 
 function scrollToElement(target, { desk = els.desk, smooth = true } = {}) {
   desk.scrollTo({ top: target.getBoundingClientRect().top - desk.getBoundingClientRect().top + desk.scrollTop - 16, behavior: smooth ? 'smooth' : 'auto' });
@@ -630,7 +632,7 @@ async function openAtLine(path, line, query) {
     best.classList.add('flash');
     setTimeout(() => best.classList.remove('flash'), 1400);
   } else els.desk.scrollTop = 0;
-  if (query) api.find(query, { findNext: false });
+  if (query) find.show(query);
 }
 
 let scrollRaf = 0;
@@ -851,29 +853,21 @@ function openFind() {
 }
 function closeFind() {
   els.findBar.hidden = true;
-  els.findCount.textContent = '';
-  api.stopFind();
+  find.clear();
 }
 function findAgain(forward) {
   if (els.findBar.hidden || !els.findInput.value) { openFind(); return; }
-  api.find(els.findInput.value, { forward, findNext: true });
+  find.step(els.findInput.value, forward);
 }
-let findTimer = 0;
-els.findInput.addEventListener('input', () => {
-  clearTimeout(findTimer);
-  findTimer = setTimeout(() => {
-    const q = els.findInput.value;
-    if (q) api.find(q, { findNext: false }); else { api.stopFind(); els.findCount.textContent = ''; }
-  }, 120);
-});
+// Nothing runs while you type: the search starts on Enter, then Enter / Shift+Enter move between matches.
+els.findInput.addEventListener('input', () => find.clear());
 els.findInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && els.findInput.value) { e.preventDefault(); api.find(els.findInput.value, { forward: !e.shiftKey, findNext: true }); }
+  if (e.key === 'Enter' && els.findInput.value) { e.preventDefault(); find.step(els.findInput.value, !e.shiftKey); }
   if (e.key === 'Escape') closeFind();
 });
 $('find-next').onclick = () => findAgain(true);
 $('find-prev').onclick = () => findAgain(false);
 $('find-close').onclick = closeFind;
-api.onFindResult(({ active, total }) => { els.findCount.textContent = total ? `${active} of ${total}` : 'No results'; });
 
 // ================================================================ toolbar
 $('btn-open').onclick = () => api.openDialog();
