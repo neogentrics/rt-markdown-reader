@@ -238,7 +238,6 @@ function createWindow(opts = {}) {
   // Document content may never navigate the app window or open windows of its own.
   win.webContents.on('will-navigate', (e, url) => { e.preventDefault(); handleUnmanagedLink(url); });
   win.webContents.setWindowOpenHandler(({ url }) => { handleUnmanagedLink(url); return { action: 'deny' }; });
-  win.webContents.on('found-in-page', (_e, r) => win.webContents.send('find:result', { active: r.activeMatchOrdinal, total: r.matches }));
   win.webContents.on('context-menu', (_e, params) => showEditContextMenu(win, params));
   // The page refuses to unload while it has unsaved edits; confirm before discarding them.
   win.webContents.on('will-prevent-unload', (e) => {
@@ -1818,11 +1817,6 @@ function registerIpc() {
     return rendererSettings();
   });
   ipcMain.handle('recent:clear', () => { settings.update({ recent: [] }); app.clearRecentDocuments(); broadcastSettings(); });
-  ipcMain.handle('find:start', (e, text, opts = {}) => {
-    if (!isStr(text, 500)) return;
-    e.sender.findInPage(text, { forward: opts.forward !== false, findNext: !!opts.findNext, matchCase: !!opts.matchCase });
-  });
-  ipcMain.handle('find:stop', (e) => e.sender.stopFindInPage('keepSelection'));
   ipcMain.handle('update:install', () => updater.installNow());
   ipcMain.handle('update:open-page', () => shell.openExternal(updater.status.url || RELEASES_URL));
 
