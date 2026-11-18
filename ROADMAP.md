@@ -43,7 +43,7 @@ major version, 4.0, is kept for a change to what the app is: the writing studio.
 | [v3.8](#v38--notion) | Notion | ✅ Released ([3.8.0](https://github.com/neogentrics/rt-markdown-reader/releases/tag/v3.8.0)) |
 | [v3.9](#v39--your-home-server) | Your home server | ✅ Released ([3.9.0](https://github.com/neogentrics/rt-markdown-reader/releases/tag/v3.9.0)) |
 | [v3.10](#v310--publish-anywhere) | Publish anywhere | ✅ Released ([3.10.0](https://github.com/neogentrics/rt-markdown-reader/releases/tag/v3.10.0)) |
-| [v3.11](#v311--working-with-rt-story-tracker) | Working with RT Story Tracker | 🔨 In progress |
+| [v3.11](#v311--working-with-rt-story-tracker) | Working with RT Story Tracker | ✅ Released ([3.11.0](https://github.com/neogentrics/rt-markdown-reader/releases/tag/v3.11.0)) |
 | [v4.0](#v40--writing-studio) | Writing studio | Planned |
 | [Later](#later--only-if-needed) | Only if needed | Ideas |
 | [Ongoing](#ongoing--polish--distribution) | Polish & distribution | Ongoing |
@@ -306,7 +306,7 @@ app learns to talk to them (decision 12).
 
 ## v3.11 — Working with RT Story Tracker
 
-🔨 **In progress.** The rest of what RT Story Tracker 3.7 asked of App Link version 1. It waits for the owner's review.
+✅ **Released in [3.11.0](https://github.com/neogentrics/rt-markdown-reader/releases/tag/v3.11.0).** The rest of what RT Story Tracker 3.7 asked of App Link version 1.
 
 | Feature | Size | Details |
 |---|:-:|---|

@@ -773,10 +773,10 @@ On macOS use `Cmd` instead of `Ctrl`. Any of these can be changed under *Prefere
   and Outline, and one list of your servers.
 - **v3.10** added publishing anywhere: drafts on WordPress and Ghost, posts to Discord, and a list of where each
   document has gone.
+- **v3.11** added working with RT Story Tracker: *Send to StoryTracker*, with or without a link, and pictures that
+  travel with a document.
 
 Coming next:
-- **v3.11 — Working with RT Story Tracker:** *Send to StoryTracker*, with or without a link, and pictures that travel with a
-  document.
 - **v4.0 — Writing studio:** book projects exported as EPUB, print-ready PDF and Word, Git built in,
   a folder published as a website, and an add-on gallery.
 - **Later, if needed:** shared review, a phone companion, writing together live.
