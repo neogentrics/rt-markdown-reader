@@ -64,3 +64,47 @@ App Link today only sees an app while it's running. The owner wants the apps to 
 **Asking for facts.** A linked app can ask another for the things it owns in the table above, such as a book's word count, with a request named for the fact. Each kind of fact is added to [app-link.md](app-link.md) when the first app needs it.
 
 **Same computer first.** All of this is for apps on one computer. Between computers, each app keeps its own sync.
+
+## Research clips
+
+Recon Browser lets an author clip text from a web page and send it to the apps that can use it. It goes over App Link, like any other document, so there is no second protocol, no shared drop folder and no extra address to register. This is planned, not built.
+
+**How it travels.** Recon Browser is an App Link app (id `recon-browser`). It sends `open_document` with `kind: "research"`, once the person has approved the link. The clip is Markdown text with its details at the top, so any app can read it:
+
+```
+---
+source_url: https://example.com/page
+source_title: The page's title
+source_author: Optional byline
+source_date: Optional date the page was published
+accessed: 2026-11-18
+category: lore | character | setting | historical | science | general
+tags: [research, web-clip]
+---
+# Title of the clip
+
+The clipped text, as Markdown.
+
+> Source: [The page's title](https://example.com/page), by the author (accessed 2026-11-18)
+```
+
+These fields are optional, and an app that doesn't know them ignores them.
+
+**Who takes it.**
+
+| App | What it does with a clip |
+|---|---|
+| RT Story Tracker | Shows its "which project, and as what" window. Until Research records exist (v3.12) the clip waits in the project's inbox, and then it becomes a Research record with the source line as its citation. |
+| RT Markdown Reader | Opens it as a normal document. Later, the source details could become a citation entry, since Reader already reads BibTeX and CSL JSON. |
+| Others | Don't need to accept it. |
+
+**Rules for every app that receives one.**
+
+- Nothing is stored until the person chooses where it goes.
+- A locked project holds the clip until it's unlocked, and never writes it to an unencrypted file.
+- Clip text goes through the same cleaning as any document before it's shown.
+- Never fetch a picture from a clip's web address when it arrives, because that would tell the site it was read. Pictures come only if the person agrees, and then as `attachments`.
+- The usual App Link limits apply: 20 waiting, and 8 MB for each.
+- A name taken from outside, such as an `id`, is never used as a file name unless it's checked first.
+
+The first idea for this, from the Recon Browser side, used an `rtstory://` link and a shared inbox folder. It's kept as a reference, but the rules above replace its transport.
