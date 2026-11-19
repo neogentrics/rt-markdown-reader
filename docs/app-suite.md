@@ -182,7 +182,7 @@ Every app should feel like the same family. RT Markdown Reader is the reference,
 
 **Preferences.** One window (`Ctrl+,`) holds every setting, in sections. A setting that's moved there stays reachable by name from the command palette. This is what keeps the menus short.
 
-**Themes and fonts.** The shared themes (Paper, Sepia, Night, Mist, Forest, Dusk, High Contrast, Blue, Red and Yellow), *Follow System*, the *Glass* look, the *Colour-safe* option for colour blindness, *Customize Theme* for your own colours, and the shared choice of fonts. The theme button is visible on the main screen, not buried. A test measures the contrast of every theme.
+**Themes and fonts.** The shared themes (Paper, Sepia, Night, Mist, Forest, Dusk, High Contrast, Blue, Red and Yellow), *Follow System*, the *Solid*, *Metallic* and *Glass* looks (the page and editor stay flat in all three), the *Colour-safe* option for colour blindness, *Customize Theme* for your own colours, and the shared choice of fonts. The theme button is visible on the main screen, not buried. A test measures the contrast of every theme.
 
 **The toolbar.** Icon buttons, each with a name that shows on hover and is read out by screen readers. Only the commonly used ones are there, and the rest are in the menus. Reader's v3.14 makes the toolbar adjustable (hide, reorder, shrink, names beside icons), and the other apps copy that when it exists. The apps status icon sits at the right end.
 
