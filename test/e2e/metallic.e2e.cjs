@@ -44,10 +44,10 @@ const step = async (name, fn) => { await fn(); console.log('ok -', name); };
   }, [theme, surface, extra]).then(() => win.waitForFunction(([t, s]) => document.documentElement.dataset.theme === t && document.documentElement.dataset.surface === s, [theme, surface]));
 
   /**
-   * Measure every control matching `groups` ({ name: selector }). Returns the ones that fall short, as text, and throws if a
-   * group matches nothing (a measurement that looks at nothing proves nothing).
+   * Measure every control matching `groups` ({ name: selector }) that can be seen where the window is now. Returns the ones
+   * that fall short, as text, with how many of each group were measured in `.counts`.
    */
-  async function readable(groups) {
+  async function measure(groups) {
     const tagged = await win.evaluate((groups) => {
       document.querySelectorAll('[data-m]').forEach((e) => e.removeAttribute('data-m'));
       const out = {};
@@ -59,13 +59,22 @@ const step = async (name, fn) => { await fn(); console.log('ok -', name); };
           if (el.disabled || r.width < 6 || r.height < 6 || r.left < 0 || r.top < 0 || r.right > innerWidth || r.bottom > innerHeight) continue;
           const cs = getComputedStyle(el);
           if (cs.visibility === 'hidden' || cs.display === 'none') continue;
+          // Not scrolled out of sight: something inside a scrolling box (a long dialog) that's past its edge is clipped, not
+          // painted, and the window behind it is what a measurement would land on. It's measured when it's scrolled into view.
+          let clipped = false;
+          for (let a = el.parentElement; a && a !== document.documentElement; a = a.parentElement) {
+            if (getComputedStyle(a).overflowY === 'visible') continue;
+            const ar = a.getBoundingClientRect();     // what it clips to is inside its border, which isn't a surface the text sits on
+            const top = ar.top + a.clientTop, left = ar.left + a.clientLeft;
+            if (r.top < top - 0.5 || r.bottom > top + a.clientHeight + 0.5 || r.left < left - 0.5 || r.right > left + a.clientWidth + 0.5) { clipped = true; break; }
+          }
+          if (clipped) continue;
           el.setAttribute('data-m', `${name}|${n++}`);
           out[name]++;
         }
       }
       return out;
     }, groups);
-    for (const [name, count] of Object.entries(tagged)) assert.ok(count > 0, `nothing matched for "${name}" (${groups[name]}): the test would be looking at nothing`);
     // Hide the text and the icons, so what's left under them is the surface itself.
     await win.evaluate(() => {
       const style = document.createElement('style');
@@ -76,7 +85,7 @@ const step = async (name, fn) => { await fn(); console.log('ok -', name); };
     });
     await win.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
     const shot = (await win.screenshot()).toString('base64');
-    return win.evaluate(async (shot) => {
+    const failures = await win.evaluate(async (shot) => {
       document.getElementById('m-hide')?.remove();
       const bytes = Uint8Array.from(atob(shot), (c) => c.charCodeAt(0));     // not fetch(): the page's security policy rules out data: addresses
       const bitmap = await createImageBitmap(new Blob([bytes], { type: 'image/png' }));
@@ -137,6 +146,36 @@ const step = async (name, fn) => { await fn(); console.log('ok -', name); };
       }
       return failures;
     }, shot);
+    return Object.assign(failures, { counts: tagged });
+  }
+
+  /** Measure a place that's one view, and make sure every group was really looked at (a measurement of nothing proves nothing). */
+  async function readable(groups) {
+    const failures = await measure(groups);
+    for (const [name, count] of Object.entries(failures.counts)) assert.ok(count > 0, `nothing matched for "${name}" (${groups[name]}): the test would be looking at nothing`);
+    return [...failures];
+  }
+
+  /**
+   * Measure a place that scrolls (a long dialog), from its top to its bottom in overlapping steps, so each control is looked at
+   * where a person would see it, over the finish and not over whatever is outside the box. Each group must be seen at some stop.
+   */
+  async function readableScrolling(groups, scroller) {
+    const seen = Object.fromEntries(Object.keys(groups).map((k) => [k, 0]));
+    const bad = new Set();
+    const room = await win.$eval(scroller, (e) => ({ max: e.scrollHeight - e.clientHeight, step: Math.max(40, Math.floor(e.clientHeight * 0.5)) }));
+    for (let top = 0; ; top += room.step) {
+      const at = Math.min(top, room.max);
+      await win.$eval(scroller, (e, y) => { e.scrollTop = y; }, at);
+      await win.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+      const failures = await measure(groups);
+      failures.forEach((f) => bad.add(f));
+      for (const [name, count] of Object.entries(failures.counts)) seen[name] += count;
+      if (at >= room.max) break;
+    }
+    for (const [name, count] of Object.entries(seen)) assert.ok(count > 0, `nothing matched for "${name}" (${groups[name]}) anywhere in ${scroller}: the test would be looking at nothing`);
+    await win.$eval(scroller, (e) => { e.scrollTop = 0; });
+    return [...bad];
   }
 
   const MAIN = {
@@ -167,7 +206,7 @@ const step = async (name, fn) => { await fn(); console.log('ok -', name); };
     await menu('preferences');
     await win.waitForSelector('#prefs-dlg[open]');
     await win.click('.prefs-nav [data-pane=voices]');
-    bad.push(...await readable(PREFS));
+    bad.push(...await readableScrolling(PREFS, '#prefs-dlg'));
     await win.click('#prefs-done');
     await win.waitForSelector('#prefs-dlg', { state: 'hidden' });
     assert.deepEqual(bad, [], `text that can't be read well on the Metallic look, ${where}:\n  ${bad.join('\n  ')}`);
