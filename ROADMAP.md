@@ -45,7 +45,7 @@ major version, 4.0, is kept for a change to what the app is: the writing studio.
 | [v3.10](#v310--publish-anywhere) | Publish anywhere | ✅ Released ([3.10.0](https://github.com/neogentrics/rt-markdown-reader/releases/tag/v3.10.0)) |
 | [v3.11](#v311--working-with-rt-story-tracker) | Working with RT Story Tracker | ✅ Released ([3.11.0](https://github.com/neogentrics/rt-markdown-reader/releases/tag/v3.11.0)) |
 | [v3.12](#v312--warmer-livelier-voices) | Warmer, livelier voices | 🔨 In progress |
-| [v3.13](#v313--metallic-finish) | Metallic finish | Planned |
+| [v3.13](#v313--metallic-finish) | Metallic finish | 🔨 In progress |
 | [v3.14](#v314--your-apps-at-a-glance) | Your apps at a glance | Planned |
 | [v4.0](#v40--writing-studio) | Writing studio | Planned |
 | [Later](#later--only-if-needed) | Only if needed | Ideas |
@@ -334,17 +334,17 @@ app learns to talk to them (decision 12).
 
 ## v3.13 — Metallic finish
 
-🙋 A third look beside Solid and Glass, raised by the owner on 2026-11-19 after seeing it in Recon Browser. **Planned: not built until the owner says.**
+🙋 A third look beside Solid and Glass, raised by the owner on 2026-11-19 after seeing it in Recon Browser. **Built, and waiting for the owner to look at it.** Planned on 2026-11-19; the owner said to build it the same day.
 
 Metallic is layered gradients, not blur: a light highlight along the top, a darker band through the middle and a soft light band near the bottom, a one-pixel light line on the top edges and a dark one on the bottom, a drop shadow, and borders mixed toward white. Recon Browser's version (`src/renderer/style.css`, *Aspect Variations*) is written for dark themes, with fixed white and black layers. Reader has light themes too, so this is our own version, with the strength of each layer set by whether the theme is light or dark.
 
 | Feature | Size | Details |
 |---|:-:|---|
-| 🙋 The Metallic look | S | A third choice in *Preferences → Appearance → Look*, the *View → Look* menu and the theme button, in the order Solid, Metallic, Glass. It works on top of any theme and is saved as `surface: "metallic"`. A copy of Reader that doesn't know it yet ignores it and keeps its own look. |
-| What gets the finish | M | The toolbar and its buttons (the main button brighter and glossier), the tab strip and the active tab, the sidebar and its panels, dialogs and pop-ups (Preferences, Help Center and the rest), and the read-aloud bar. Text boxes and lists in them are recessed: a dark inset shadow with a light lip. The Apps status icon (v3.14) uses the same finish when it arrives. |
-| What stays flat | S | The page you read and the editor, so text is always on a plain surface. Printing and exports. High Contrast, and any computer using forced colours, which step aside the way Glass does. |
-| How it's written | S | In `theme.css` beside Glass, under `:root[data-surface="metallic"]`, with no `!important`. A few tokens (highlight, shade, rim, edge and shadow) are set once for light themes and once for dark, so Paper gets a soft sheen instead of a dark band. Customize Theme colours work too, because the layers sit over whatever panel colour is chosen. |
-| 🛡️ Contrast test | M | The accessibility test can't check this as it stands. Axe, the checker it uses, gives up on text over a gradient ("needs review") and the test counts that as a pass, so a Metallic theme could pass while its text is unreadable. The new check hides the text, takes a picture of each part, finds the lightest and darkest background in it, and tests the real text colour against both (4.5:1 for text, 3:1 for icons). It runs for all ten themes in Metallic, plus a Customize Theme example, and confirms High Contrast and forced colours are still flat. Glass is checked on four themes today and goes to all ten as well. |
+| ✅ 🙋 The Metallic look | S | A third choice in *Preferences → Appearance → Look*, the *View → Look* menu and the theme button, in the order Solid, Metallic, Glass. It works on top of any theme and is saved as `surface: "metallic"`. A copy of Reader that doesn't know it yet ignores it and keeps its own look. |
+| ✅ What gets the finish | M | The toolbar and its buttons (the main button brighter and glossier), the tab strip and the active tab, the sidebar and its panels, dialogs and pop-ups (Preferences, Help Center and the rest), and the read-aloud bar. Text boxes and lists in them are recessed: a dark inset shadow with a light lip. The Apps status icon (v3.14) uses the same finish when it arrives. |
+| ✅ What stays flat | S | The page you read and the editor, so text is always on a plain surface. Printing and exports. High Contrast, and any computer using forced colours, which step aside the way Glass does. |
+| ✅ How it's written | S | In its own `styles/metallic.css`, under `:root[data-surface="metallic"]`, with no `!important`. The strength of each layer (highlight, band, edge, shadow) is worked out from the lightness of the text on that surface, so Paper gets a soft sheen instead of a dark band, and Sepia, Blue and Red, whose toolbar is dark under a light page, get the right one too. Customize Theme colours work too, because the layers sit over whatever panel colour is chosen. |
+| ✅ 🛡️ Contrast test | M | The accessibility test can't check this as it stands. Axe, the checker it uses, gives up on text over a gradient ("needs review") and the test counts that as a pass, so a Metallic theme could pass while its text is unreadable. The new check (`test/e2e/metallic.e2e.cjs`) hides the text, takes a picture of the window, looks at the background behind each control's own words or icon, finds the lightest and darkest background in it, and tests the real text colour against both (4.5:1 for text, 3:1 for icons). It runs for all ten themes in Metallic, plus a Customize Theme example, and confirms High Contrast and forced colours are still flat. The accessibility test now runs Glass and Metallic on all ten themes (Glass was four). A deliberate-failure case proves the check catches a finish that's too bright. |
 
 ## v3.14 — Your apps at a glance
 

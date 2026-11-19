@@ -647,6 +647,13 @@ it steps aside if your computer is set for less transparency.
 
 <img src="docs/screenshots/glass.png" width="860" alt="The Paper theme with the Glass look: frosted panels and page over soft blue and green">
 
+<img src="docs/screenshots/metallic.png" width="860" alt="The Paper theme with the Metallic look: a brushed-metal toolbar and tab, raised buttons, and a recessed filter box">
+
+*New in 3.13:* the **Metallic** look, beside Solid and Glass (the theme button, *Preferences → Appearance* or *View → Look*), gives the toolbar, tabs,
+sidebar, dialogs and read-aloud bar a brushed-metal finish: raised buttons, a glossy main button and recessed text boxes. It works on top of
+any theme, and with your own colours from *Customize Theme*. The page and the editor stay flat, and so do printing, exports, High Contrast,
+forced colours and a computer set for more contrast. A test measures the contrast of every part of it in every theme.
+
 **Colour-safe colours** (*Preferences → Appearance*) work with any theme, for protanopia, deuteranopia and tritanopia.
 Compare shows changes in blue and orange instead of green and red, with underlines and strikethroughs so they don't
 rest on colour alone, and charts and highlights change to colours that stay different. Exported files keep the normal colours.
@@ -784,7 +791,7 @@ On macOS use `Cmd` instead of `Ctrl`. Any of these can be changed under *Prefere
 Coming next:
 - **v3.12 — Warmer, livelier voices:** the natural voices read with more life. A pace, a quality, a warmth and a breathing
   setting in *Preferences → Reading Aloud*, nine blended voices, less dead air between sentences, and dashes read as pauses.
-- **v3.13 — Metallic finish:** a third look beside Solid and Glass, with brushed-metal toolbars, tabs and dialogs.
+- **v3.13 — Metallic finish:** a third look beside Solid and Glass: raised, brushed-metal toolbars, tabs, sidebar and dialogs, with a test that measures the contrast of every part in every theme.
 - **v3.14 — Your apps at a glance:** a small indicator that shows which other Recon Towers apps are linked, and a
   toolbar you can tidy.
 - **v4.0 — Writing studio:** book projects exported as EPUB, print-ready PDF and Word, Git built in,

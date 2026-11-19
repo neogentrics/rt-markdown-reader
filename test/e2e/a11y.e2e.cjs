@@ -53,11 +53,15 @@ const step = async (name, fn) => { await fn(); console.log('ok -', name); };
     // Glass steps aside on a computer set for less transparency, so make sure it's really being checked.
     const cdp = await win.context().newCDPSession(win);
     await cdp.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-transparency', value: 'no-preference' }] });
-    await win.evaluate(() => window.reader.setSettings({ surface: 'glass' }));
-    for (const theme of ['light', 'dark', 'blue', 'yellow']) {
-      await win.evaluate((t) => window.reader.setSettings({ theme: t }), theme);
-      await win.waitForFunction((t) => document.documentElement.dataset.theme === t, theme);
-      await problems(`the showcase in the ${theme} theme with the Glass look`);
+    // Glass and Metallic on all ten themes (Glass was four). The Metallic look is also measured pixel by pixel in
+    // metallic.e2e.cjs, because axe can't judge text over a gradient.
+    for (const surface of ['glass', 'metallic']) {
+      await win.evaluate((s) => window.reader.setSettings({ surface: s }), surface);
+      for (const theme of ['light', 'sepia', 'mist', 'dark', 'forest', 'dusk', 'contrast', 'blue', 'red', 'yellow']) {
+        await win.evaluate((t) => window.reader.setSettings({ theme: t }), theme);
+        await win.waitForFunction((t) => document.documentElement.dataset.theme === t, theme);
+        await problems(`the showcase in the ${theme} theme with the ${surface} look`);
+      }
     }
     await win.evaluate(() => window.reader.setSettings({ surface: 'solid', colorSafe: true }));
     for (const theme of ['light', 'dark', 'yellow']) {
