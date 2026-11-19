@@ -784,7 +784,8 @@ On macOS use `Cmd` instead of `Ctrl`. Any of these can be changed under *Prefere
 Coming next:
 - **v3.12 — Warmer, livelier voices:** the natural voices read with more life. A pace, a quality, a warmth and a breathing
   setting in *Preferences → Reading Aloud*, nine blended voices, less dead air between sentences, and dashes read as pauses.
-- **v3.13 — Your apps at a glance:** a small indicator that shows which other Recon Towers apps are linked, and a
+- **v3.13 — Metallic finish:** a third look beside Solid and Glass, with brushed-metal toolbars, tabs and dialogs.
+- **v3.14 — Your apps at a glance:** a small indicator that shows which other Recon Towers apps are linked, and a
   toolbar you can tidy.
 - **v4.0 — Writing studio:** book projects exported as EPUB, print-ready PDF and Word, Git built in,
   a folder published as a website, and an add-on gallery.
