@@ -226,3 +226,22 @@ test('breathing: a breath before the first sentence and a sigh after the last, b
   assert.equal(text.withBreath('Hello there.', { start: true, end: true }), '<breath> Hello there. <sigh>');
   assert.equal(text.withBreath('Hello there.', { start: false, end: false }), 'Hello there.');
 });
+
+test('blended voices: each is a half-and-half mix of two real voices, with its own name, and is offered after the ten (3.12)', async () => {
+  const { VOICES } = await import('../src/main/voices.js');
+  const names = [...text.SINGLE_VOICES.map((id) => text.VOICE_NAMES[id]), ...Object.values(text.BLENDS).map((b) => b.name)];
+  assert.equal(new Set(names).size, 19, 'no two voices share a name');
+  assert.deepEqual(VOICES, [...text.SINGLE_VOICES, ...Object.keys(text.BLENDS)]);
+  assert.equal(text.SINGLE_VOICES.length, 10);
+  for (const [id, b] of Object.entries(text.BLENDS)) {
+    assert.match(id, /^B\d$/);
+    assert.equal(b.parts.length, 2);
+    assert.ok(b.parts.every(([part]) => text.SINGLE_VOICES.includes(part)), `${b.name} is made from voices the model ships`);
+    assert.ok(Math.abs(b.parts.reduce((n, [, w]) => n + w, 0) - 1) < 1e-9, `${b.name}’s weights add up to 1`);
+    assert.equal(b.parts[0][0][0], b.parts[1][0][0], `${b.name} mixes two voices of one kind`);
+    assert.equal(b.gender, b.parts[0][0][0] === 'F' ? 'female' : 'male');
+  }
+  assert.equal(text.voiceLabel('B1'), 'Elise (female, blended)');
+  assert.equal(text.voiceLabel('B6'), 'Felix (male, blended)');
+  assert.equal(text.voiceLabel('F1'), 'Clara (female)');
+});

@@ -127,3 +127,13 @@ test('stepGovernor: goes by the middle of the last few sentences, so one slow on
   g.reset();
   assert.equal(g.cap(12), 12);
 });
+
+test('mixStyles with the shipped blends: a half-and-half mix lies between its two voices, in the same shape', () => {
+  const voice = (seed) => { const r = seeded(seed); return { style_ttl: { dims: [1, 2, 3], type: 'float32', data: [[[...Array(3)].map(() => r()), [...Array(3)].map(() => r())]] }, style_dp: { dims: [1, 1, 2], type: 'float32', data: [[[r(), r()]]] } }; };
+  const a = voice(1), b = voice(2);
+  const mix = mixStyles([[a, 0.5], [b, 0.5]]);
+  assert.deepEqual(mix.style_ttl.dims, [1, 2, 3]);
+  const flat = (v) => v.data.flat(Infinity);
+  flat(mix.style_ttl).forEach((v, i) => assert.ok(Math.abs(v - (flat(a.style_ttl)[i] + flat(b.style_ttl)[i]) / 2) < 1e-6));
+  assert.throws(() => mixStyles([[a, 0.5], [{ style_ttl: { dims: [1, 9], data: [new Array(9).fill(0)] }, style_dp: a.style_dp }, 0.5]]), /don’t fit/);
+});

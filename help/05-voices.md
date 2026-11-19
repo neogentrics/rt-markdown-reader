@@ -10,6 +10,7 @@ Open [Preferences → Reading Aloud](#do=preferences:voices), or use the **Voice
 
 - **This computer's voices**, which are already installed. They can sound robotic.
 - **Natural voices**: ten voices that sound like a person. Clara, Maya, Nora, Sofia and Zoe are female, and Ethan, Leo, Marcus, Owen and Theo are male.
+- **Blended voices**: nine more, listed after those ten and marked *blended*. Each is made on your computer by mixing two of the ten half and half, so nothing more is downloaded. Elise (Clara and Maya), Hazel (Clara and Nora), Lena (Maya and Zoe), Ada (Nora and Sofia) and Ruth (Sofia and Zoe) are female, and Felix (Ethan and Leo), Jonah (Ethan and Marcus), Silas (Leo and Owen) and Gabriel (Marcus and Theo) are male. Pace, quality, warmth and breathing work with them the same way.
 
 ## Getting the natural voices
 

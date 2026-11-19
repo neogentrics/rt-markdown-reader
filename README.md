@@ -424,7 +424,8 @@ choose, and your cloud service carries them between computers.
 <img src="docs/screenshots/natural-voices.png" width="860" alt="A document being read aloud with Nora, a natural voice: the sentence being read is highlighted, and the read-aloud bar shows sentence 11 of 76">
 
 Your computer's built-in voices can sound flat and robotic. Since 3.2, *Read aloud* can use **natural
-voices** instead: ten of them, five female and five male, that sound like someone reading to you.
+voices** instead: ten of them, five female and five male, that sound like someone reading to you. Since 3.12 there are
+nine more, made on your computer by mixing two of the ten half and half.
 
 - **Getting them:** open *Read aloud* (`Ctrl+Shift+U`), open the voice list and choose *Get natural
   voices…*. The app says how big they are (about 400 MB) and what license they come under, and downloads
@@ -782,7 +783,7 @@ On macOS use `Cmd` instead of `Ctrl`. Any of these can be changed under *Prefere
 
 Coming next:
 - **v3.12 — Warmer, livelier voices:** the natural voices read with more life. A pace, a quality, a warmth and a breathing
-  setting in *Preferences → Reading Aloud*, less dead air between sentences, and dashes read as pauses.
+  setting in *Preferences → Reading Aloud*, nine blended voices, less dead air between sentences, and dashes read as pauses.
 - **v3.13 — Your apps at a glance:** a small indicator that shows which other Recon Towers apps are linked, and a
   toolbar you can tidy.
 - **v4.0 — Writing studio:** book projects exported as EPUB, print-ready PDF and Word, Git built in,

@@ -1,5 +1,6 @@
 // Voice lab: make short sample clips of the natural voices at different settings, so they can be compared by ear.
-//   node scripts/voice-lab.mjs [--model ~/voice-lab/supertonic-3] [--out ~/voice-samples] [--only steps,speed,...]
+//   node scripts/voice-lab.mjs [--model ~/voice-lab/supertonic-3] [--out ~/voice-samples] [--only steps,speed,text,tags,warmth,recipes,blends,confirm,mixes]
+//   confirm (3.12) makes the clips that check the new defaults, made the way the app makes them; mixes makes the blended voices the app offers.
 // Needs the Supertonic 3 model already downloaded (the app downloads it; the folder is the one with onnx/ and
 // voice_styles/ in it). Every clip of a comparison uses the same random seed and is brought to the same
 // loudness, so the setting being tested is the only thing that differs.
@@ -14,7 +15,7 @@ const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const { Supertonic, voiceStyle } = require('../src/main/supertonic.js');
 const { VOICE_NAMES } = require('../src/main/voice-text.js');
 const { warm, mixStyles, seeded, matchLoudness, trimSilence, DEFAULT_READING, QUALITY } = require('../src/main/voice-tone.js');
-const { breathAt, withBreath } = require('../src/main/voice-text.js');
+const { breathAt, withBreath, BLENDS: SHIPPED_BLENDS, SINGLE_VOICES, VOICE_NAMES: NAMES } = require('../src/main/voice-text.js');
 const { openingOf } = await import('../src/renderer/read-ui.js');
 const { measure } = await import('./voice-measure.mjs');
 
@@ -189,7 +190,7 @@ async function appSentence(text, voiceId, how = {}) {
   const say = how.tags ? withBreath(text, how.tags) : text;
   const parts = how.start ? openingOf(say) : null;                         // a sentence that opens a reading is made in two halves
   const rate = tts.sampleRate;
-  const make = async (t, steps, seed) => tts.speak(t, { lang: 'en', style: styleOf(voiceId), speed: o.pace, steps, random: seeded(seed) });
+  const make = async (t, steps, seed) => tts.speak(t, { lang: 'en', style: styleOf(voiceId, how.spec), speed: o.pace, steps, random: seeded(seed) });
   if (!parts) {
     const samples = await make(say, how.start ? o.quickSteps : o.steps, CONFIRM_SEED);
     return old ? samples : warm(trimSilence(samples, rate, 0.1, 0.3), rate, o.warmth);
@@ -241,6 +242,22 @@ if (wanted('confirm')) {
     saveApp('C-the-start-of-a-reading', `S-opening__${who}__BEFORE`, await appSentence(opening, voiceId, { old: true, start: true }), { s: 'S', voice: who, setting: 'before', note: 'BEFORE: the first sentence of a reading as the app made it: two halves, with the model’s silence in the middle', text: opening });
     saveApp('C-the-start-of-a-reading', `S-opening__${who}__NEW-defaults`, await appSentence(opening, voiceId, { start: true }), { s: 'S', voice: who, setting: 'new defaults', note: 'NEW: the same two halves with the middle closed up to a comma’s pause, and 12 steps', text: opening });
     saveApp('C-the-start-of-a-reading', `S-opening__${who}__NEW-with-a-breath`, await appSentence(opening, voiceId, { start: true, tags: { start: true, end: false } }), { s: 'S', voice: who, setting: 'new defaults + a breath', note: 'NEW + a breath before the first word (Breathing on)', text: `<breath> ${opening}` });
+  }
+}
+
+// ------------------------------------------------------------------ 5. mixes: the blended voices the app offers (3.12), at the new defaults
+if (wanted('mixes')) {
+  console.log('9 mixes');
+  const mixSpec = (b) => mixStyles(b.parts.map(([id, w]) => [styleJson(id), w]));
+  for (const k of ['A', 'B']) {
+    const text = SENTENCES[k].text.replace(/\s*—\s*/g, ', ');
+    for (const id of SINGLE_VOICES) {
+      save('D-blended-voices', `${k}-${SENTENCES[k].name}__${NAMES[id]}__original`, await appSentence(text, id, {}), { s: k, voice: NAMES[id], setting: 'original', note: `${NAMES[id]}, one of the ten the model ships (for comparison)`, text });
+    }
+    for (const [id, b] of Object.entries(SHIPPED_BLENDS)) {
+      const parents = b.parts.map(([p]) => NAMES[p]).join(' + ');
+      save('D-blended-voices', `${k}-${SENTENCES[k].name}__${b.name}__BLEND`, await appSentence(text, id, { spec: mixSpec(b) }), { s: k, voice: b.name, setting: 'blend', note: `${b.name} (${b.gender}), made from ${parents} half and half`, text });
+    }
   }
 }
 

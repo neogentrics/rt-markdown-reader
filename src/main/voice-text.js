@@ -130,6 +130,23 @@ function guessLang(text) {
 
 /** The natural voices' names. The ids are what's saved, so a name can change without losing anyone's choice. */
 const VOICE_NAMES = { F1: 'Clara', F2: 'Maya', F3: 'Nora', F4: 'Sofia', F5: 'Zoe', M1: 'Ethan', M2: 'Leo', M3: 'Marcus', M4: 'Owen', M5: 'Theo' };
-const voiceLabel = (id) => `${VOICE_NAMES[id] || id} (${id[0] === 'F' ? 'female' : 'male'})`;
 
-module.exports = { VOICE_NAMES, voiceLabel, applyPronunciation, LANGS, modelLang, pauseDashes, prepare, breathAt, withBreath, chunks, guessLang };
+/**
+ * Blended voices (3.12): new voices made by mixing the style data of two voices the model already has, half and half,
+ * on this computer. Nothing more is downloaded. The ids are what's saved, and `parts` are [voice id, weight].
+ */
+const BLENDS = {
+  B1: { name: 'Elise', gender: 'female', parts: [['F1', 0.5], ['F2', 0.5]] },      // Clara + Maya
+  B2: { name: 'Hazel', gender: 'female', parts: [['F1', 0.5], ['F3', 0.5]] },      // Clara + Nora
+  B3: { name: 'Lena', gender: 'female', parts: [['F2', 0.5], ['F5', 0.5]] },       // Maya + Zoe
+  B4: { name: 'Ada', gender: 'female', parts: [['F3', 0.5], ['F4', 0.5]] },        // Nora + Sofia
+  B5: { name: 'Ruth', gender: 'female', parts: [['F4', 0.5], ['F5', 0.5]] },       // Sofia + Zoe
+  B6: { name: 'Felix', gender: 'male', parts: [['M1', 0.5], ['M2', 0.5]] },        // Ethan + Leo
+  B7: { name: 'Jonah', gender: 'male', parts: [['M1', 0.5], ['M3', 0.5]] },        // Ethan + Marcus
+  B8: { name: 'Silas', gender: 'male', parts: [['M2', 0.5], ['M4', 0.5]] },        // Leo + Owen
+  B9: { name: 'Gabriel', gender: 'male', parts: [['M3', 0.5], ['M5', 0.5]] },      // Marcus + Theo
+};
+const SINGLE_VOICES = Object.keys(VOICE_NAMES);
+const voiceLabel = (id) => (BLENDS[id] ? `${BLENDS[id].name} (${BLENDS[id].gender}, blended)` : `${VOICE_NAMES[id] || id} (${id[0] === 'F' ? 'female' : 'male'})`);
+
+module.exports = { VOICE_NAMES, BLENDS, SINGLE_VOICES, voiceLabel, applyPronunciation, LANGS, modelLang, pauseDashes, prepare, breathAt, withBreath, chunks, guessLang };

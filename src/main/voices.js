@@ -10,7 +10,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
-const { chunks } = require('./voice-text');
+const { chunks, BLENDS, SINGLE_VOICES } = require('./voice-text');
 const { warm, trimSilence } = require('./voice-tone');
 
 const MODEL = 'supertonic-3';
@@ -41,7 +41,7 @@ const FILES = [
 ];
 
 /** The voices, in the order the menu lists them. */
-const VOICES = ['F1', 'F2', 'F3', 'F4', 'F5', 'M1', 'M2', 'M3', 'M4', 'M5'];
+const VOICES = [...SINGLE_VOICES, ...Object.keys(BLENDS)];      // the ten the model ships, then the blends of them (3.12)
 
 const totalSize = (files) => files.reduce((n, f) => n + f.size, 0);
 

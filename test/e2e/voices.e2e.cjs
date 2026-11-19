@@ -81,10 +81,12 @@ const step = async (name, fn) => { await fn(); console.log('ok -', name); };
     assert.deepEqual((await boxes()).map((b) => b.message), ['Download the natural voices?']);
     assert.ok(fs.existsSync(path.join(profile, 'voices', 'supertonic-3', 'installed.json')));
     const names = await win.$$eval('#speak-voice optgroup:first-child option', (o) => o.map((x) => x.textContent));
-    assert.equal(names.length, 11);
+    assert.equal(names.length, 20, 'ten voices, nine blends of them, and Remove');
     assert.equal(names[0], 'Clara (female)');
     assert.equal(names[5], 'Ethan (male)');
-    assert.equal(names[10], 'Remove natural voices…');
+    assert.equal(names[10], 'Elise (female, blended)');
+    assert.equal(names[18], 'Gabriel (male, blended)');
+    assert.equal(names[19], 'Remove natural voices…');
     assert.equal((await win.evaluate(() => window.reader.voiceStatus())).installed, true);
   });
 
