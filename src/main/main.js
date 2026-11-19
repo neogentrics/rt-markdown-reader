@@ -3182,9 +3182,11 @@ function registerIpc() {
   });
   ipcMain.handle('voice:speak', async (_e, job = {}) => {
     if (!isStr(job.text, 20000) || !VOICES.includes(job.voice) || !VOICE_LANGS.includes(job.lang)) return { error: 'invalid' };
-    const speed = Math.min(2, Math.max(0.5, Number(job.speed) || 1.05));
-    const steps = Math.min(12, Math.max(2, Math.round(Number(job.steps) || 8)));
-    try { return await voices.speak({ text: job.text, lang: job.lang, voice: job.voice, speed, steps }); } catch (err) { return { error: err.message }; }
+    const speed = Math.min(3, Math.max(0.5, Number(job.speed) || 1.05));        // the pace (up to 1.35) times the reading Speed (up to 2)
+    const steps = Math.min(16, Math.max(2, Math.round(Number(job.steps) || 8)));
+    const warmth = Math.min(1.5, Math.max(0, Number(job.warmth) || 0));             // 0 is off (3.12)
+    const seconds = (v, fallback) => (Number.isFinite(Number(v)) && v !== null && v !== '' ? Math.min(1, Math.max(0, Number(v))) : fallback);
+    try { return await voices.speak({ text: job.text, lang: job.lang, voice: job.voice, speed, steps, warmth, head: seconds(job.head, 0.1), tail: seconds(job.tail, 0.3) }); } catch (err) { return { error: err.message }; }
   });
   ipcMain.handle('voice:cancel', () => voices.cancelSpeech());
   ipcMain.handle('addons:list', () => addonInfo());

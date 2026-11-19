@@ -10,6 +10,8 @@
 //               { type: 'audio', id, sampleRate, samples, ms } | { type: 'error', id, error }
 const fs = require('node:fs');
 const path = require('node:path');
+const { BLENDS } = require('./voice-text');
+const { mixStyles } = require('./voice-tone');
 
 const port = process.parentPort;
 let tts = null;
@@ -44,10 +46,13 @@ async function init(msg) {
 }
 
 function style(voice) {
-  if (!/^[FM][1-5]$/.test(voice)) throw new Error(`Unknown voice ${voice}`);
+  const blend = BLENDS[voice];
+  if (!blend && !/^[FM][1-5]$/.test(voice)) throw new Error(`Unknown voice ${voice}`);
   if (!styles.has(voice)) {
     const { voiceStyle } = require('./supertonic');
-    styles.set(voice, voiceStyle(tts.ort, JSON.parse(fs.readFileSync(path.join(dir, 'voice_styles', `${voice}.json`), 'utf8'))));
+    const file = (id) => JSON.parse(fs.readFileSync(path.join(dir, 'voice_styles', `${id}.json`), 'utf8'));
+    // A blended voice is made here from the files already downloaded (see BLENDS in voice-text.js).
+    styles.set(voice, voiceStyle(tts.ort, blend ? mixStyles(blend.parts.map(([id, weight]) => [file(id), weight])) : file(voice)));
   }
   return styles.get(voice);
 }

@@ -81,10 +81,12 @@ const step = async (name, fn) => { await fn(); console.log('ok -', name); };
     assert.deepEqual((await boxes()).map((b) => b.message), ['Download the natural voices?']);
     assert.ok(fs.existsSync(path.join(profile, 'voices', 'supertonic-3', 'installed.json')));
     const names = await win.$$eval('#speak-voice optgroup:first-child option', (o) => o.map((x) => x.textContent));
-    assert.equal(names.length, 11);
+    assert.equal(names.length, 20, 'ten voices, nine blends of them, and Remove');
     assert.equal(names[0], 'Clara (female)');
     assert.equal(names[5], 'Ethan (male)');
-    assert.equal(names[10], 'Remove natural voices…');
+    assert.equal(names[10], 'Elise (female, blended)');
+    assert.equal(names[18], 'Gabriel (male, blended)');
+    assert.equal(names[19], 'Remove natural voices…');
     assert.equal((await win.evaluate(() => window.reader.voiceStatus())).installed, true);
   });
 
@@ -111,6 +113,50 @@ const step = async (name, fn) => { await fn(); console.log('ok -', name); };
     await win.click('#speak-play');
     await win.waitForFunction((n) => window.__played.length > n, at, { timeout: 10000 });
     await win.waitForFunction(() => document.getElementById('speak-status').textContent === 'Finished', null, { timeout: 15000 });
+    await win.click('#speak-stop');
+  });
+
+  await step('Preferences → Reading Aloud: pace, quality, warmth and breathing are saved, and reading follows them (3.12)', async () => {
+    const saved = () => JSON.parse(fs.readFileSync(path.join(profile, 'settings.json'), 'utf8')).readAloud;
+    const before = await win.evaluate(() => window.reader.init().then((r) => r.settings.readAloud));
+    assert.deepEqual([before.pace, before.quality, before.warmth, before.breathing], [1.15, 'balanced', 1.05, 'off'], 'the defaults');
+    await menu('preferences');
+    await win.waitForSelector('#prefs-dlg[open]');
+    await win.click('.prefs-nav [data-pane=voices]');
+    assert.equal(await win.$eval('#pref-pace', (e) => e.value), '1.15');
+    assert.equal(await win.$eval('#pref-quality', (e) => e.value), 'balanced');
+    assert.equal(await win.$eval('#pref-warmth', (e) => e.value), '1.05');
+    assert.equal(await win.$eval('#pref-breathing', (e) => e.value), 'off');
+    await win.selectOption('#pref-pace', '1.25');
+    await win.selectOption('#pref-quality', 'best');
+    await win.selectOption('#pref-warmth', '1.1');
+    await win.selectOption('#pref-breathing', 'paragraphs');
+    await win.waitForFunction(() => window.reader.init().then((r) => r.settings.readAloud.breathing === 'paragraphs'));
+    // The file is written a moment after the change.
+    for (let k = 0; k < 40 && saved().breathing !== 'paragraphs'; k++) await new Promise((r) => setTimeout(r, 100));
+    const now = saved();
+    assert.deepEqual([now.pace, now.quality, now.warmth, now.breathing], [1.25, 'best', 1.1, 'paragraphs']);
+    assert.equal(now.voice, 'natural:F1', 'changing one setting leaves the others (and the voice) alone');
+    await win.click('#prefs-done');
+    await win.waitForSelector('#prefs-dlg', { state: 'hidden' });
+    // The stand-in voice makes a tone as long as the text it is given (0.06 s a character, over the speed). So the length of
+    // each sentence tells how it was asked for: at the pace chosen, with a breath before and a sigh after a paragraph, none in a heading.
+    await win.evaluate(() => { window.__played.length = 0; });
+    await menu('read-aloud');
+    await win.waitForFunction(() => window.__played.length >= 3, null, { timeout: 15000 });
+    const secs = (chars) => Math.round((44100 * chars * 0.06) / 1.25);
+    const played = (await win.evaluate(() => window.__played)).map((p) => p.n);
+    assert.equal(played[0], secs('The lighthouse'.length), 'the heading, plain');
+    assert.equal(played[1], secs('<breath> The keeper climbed the stairs every night.'.length), 'the first sentence of the paragraph begins with a breath');
+    assert.equal(played[2], secs('The lamp was old, but it still turned. <sigh>'.length), 'and its last ends with a sigh');
+    await win.click('#speak-stop');
+    // Off again: plain sentences.
+    await win.evaluate(() => window.reader.setSettings({ readAloud: { breathing: 'off', pace: 1.05 } }));
+    await win.waitForFunction(() => window.reader.init().then((r) => r.settings.readAloud.breathing === 'off'));
+    await win.evaluate(() => { window.__played.length = 0; });
+    await menu('read-aloud');
+    await win.waitForFunction(() => window.__played.length >= 2, null, { timeout: 15000 });
+    assert.equal((await win.evaluate(() => window.__played))[1].n, Math.round((44100 * 'The keeper climbed the stairs every night.'.length * 0.06) / 1.05));
     await win.click('#speak-stop');
   });
 

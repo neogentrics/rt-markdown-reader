@@ -5,6 +5,7 @@ const automations = require('./automations');
 const { cleanServers } = require('./servers');
 const fs = require('node:fs');
 const { cleanAiSettings } = require('./ai-providers');
+const { DEFAULT_READING, cleanReading } = require('./voice-tone');
 const path = require('node:path');
 
 const DEFAULTS = Object.freeze({
@@ -42,7 +43,7 @@ const DEFAULTS = Object.freeze({
   smartSearch: false,     // search by meaning (3.6): off until you turn it on; never synced
   citeStyle: 'apa',       // apa | mla | chicago | ieee | harvard — unless a document sets its own
   citeLibrary: '',        // your sources: a .bib or .json file, or 'zotero'; never synced
-  readAloud: { rate: 1, voice: '' },
+  readAloud: { rate: 1, voice: '', ...DEFAULT_READING },   // + pace, quality, warmth and breathing for the natural voices (3.12)
   speakBar: null,         // where the read-aloud bar was left: { x, y }, each 0–1 of the room it has
   audioOutput: '',        // the device natural voices play through ('' = the computer's default); never synced
   audioInput: '',         // the microphone for dictation ('' = the computer's default); never synced
@@ -196,6 +197,7 @@ function sanitize(input) {
     s.readAloud = {
       rate: Number.isFinite(rate) ? Math.min(2, Math.max(0.5, Math.round(rate * 100) / 100)) : 1,
       voice: typeof input.readAloud.voice === 'string' ? input.readAloud.voice.slice(0, 200) : '',
+      ...cleanReading(input.readAloud),
     };
   }
   const bar = input.speakBar;
@@ -218,7 +220,9 @@ class Settings {
   }
   get() { return structuredClone(this.data); }
   update(patch) {
-    this.data = sanitize({ ...this.data, ...patch });
+    // readAloud has several parts, and each part of a change only names the ones it changes.
+    const readAloud = patch.readAloud && typeof patch.readAloud === 'object' ? { ...this.data.readAloud, ...patch.readAloud } : this.data.readAloud;
+    this.data = sanitize({ ...this.data, ...patch, readAloud });
     this.save();
     this.onChange?.();          // sync (3.1) listens for changes made on this computer
     return this.get();

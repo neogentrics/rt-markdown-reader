@@ -32,9 +32,18 @@ function modelLang(lang) {
   return LANGS.includes(base) ? base : null;
 }
 
-/** Text as the model expects it: normalised, symbols spoken or dropped, ending in punctuation, tagged. */
+/**
+ * A dash is a pause when it's read aloud. The model's own example turned every dash into a plain hyphen, which it reads
+ * straight through, flat. An em dash, a spaced en dash or a spaced hyphen becomes a comma; a dash inside a range ("1990–2000")
+ * or a word ("well-known") is left alone.
+ */
+function pauseDashes(t) {
+  return t.replace(/\s*(?:—|--+)\s*|\s+[–-]\s+/g, ', ').replace(/,\s*,/g, ',').replace(/,\s*([.!?])/g, '$1');
+}
+
+/** Text as the model expects it: normalised, dashes as pauses, symbols spoken or dropped, ending in punctuation, tagged. */
 function prepare(text, lang) {
-  let t = String(text).normalize('NFKD').replace(EMOJI, '');
+  let t = pauseDashes(String(text).normalize('NFKD').replace(EMOJI, ''));
   for (const [k, v] of REPLACE) t = t.replaceAll(k, v);
   // Spaces are collapsed before punctuation is pulled in: a dropped emoji leaves two of them ("home  !").
   t = t.replace(/[♥☆♡©\\]/g, '')
@@ -44,6 +53,28 @@ function prepare(text, lang) {
     .trim();
   if (!/[.!?;:,'")\]}…。」』】〉》›»]$/.test(t)) t += '.';
   return `<${lang}>${t}</${lang}>`;
+}
+
+/**
+ * The model's own expression tags, used the way a person breathes while reading aloud (3.12): a breath before
+ * the first sentence, a sigh after the last. `mode` is the Breathing setting: 'off', 'reading' (the first sentence of
+ * a reading, and the last of the document) or 'paragraphs' (the first and last sentence of each paragraph, never a
+ * heading). `fresh` is true when this sentence starts a reading, or follows a skip (a title read first doesn't count). Returns { start, end }.
+ * `items` are { block, heading } in reading order; sentences of one paragraph share a block.
+ */
+function breathAt(mode, items, i, fresh = false) {
+  const it = items[i];
+  if (!it || mode === 'off' || it.heading) return { start: false, end: false };
+  const last = i === items.length - 1;
+  // A document usually opens with its title, so the first sentence after nothing but headings counts as the start too.
+  if (mode === 'reading') return { start: !!fresh || items.slice(0, i).every((x) => x.heading), end: last };
+  if (mode !== 'paragraphs') return { start: false, end: false };
+  return { start: !!fresh || i === 0 || items[i - 1].block !== it.block, end: last || items[i + 1].block !== it.block };
+}
+
+/** `text` with its breath and sigh tags (see breathAt). */
+function withBreath(text, tags) {
+  return `${tags.start ? '<breath> ' : ''}${text}${tags.end ? ' <sigh>' : ''}`;
 }
 
 /** Split text into pieces the model reads well: sentences, packed up to `max` characters. */
@@ -99,6 +130,23 @@ function guessLang(text) {
 
 /** The natural voices' names. The ids are what's saved, so a name can change without losing anyone's choice. */
 const VOICE_NAMES = { F1: 'Clara', F2: 'Maya', F3: 'Nora', F4: 'Sofia', F5: 'Zoe', M1: 'Ethan', M2: 'Leo', M3: 'Marcus', M4: 'Owen', M5: 'Theo' };
-const voiceLabel = (id) => `${VOICE_NAMES[id] || id} (${id[0] === 'F' ? 'female' : 'male'})`;
 
-module.exports = { VOICE_NAMES, voiceLabel, applyPronunciation, LANGS, modelLang, prepare, chunks, guessLang };
+/**
+ * Blended voices (3.12): new voices made by mixing the style data of two voices the model already has, half and half,
+ * on this computer. Nothing more is downloaded. The ids are what's saved, and `parts` are [voice id, weight].
+ */
+const BLENDS = {
+  B1: { name: 'Elise', gender: 'female', parts: [['F1', 0.5], ['F2', 0.5]] },      // Clara + Maya
+  B2: { name: 'Hazel', gender: 'female', parts: [['F1', 0.5], ['F3', 0.5]] },      // Clara + Nora
+  B3: { name: 'Lena', gender: 'female', parts: [['F2', 0.5], ['F5', 0.5]] },       // Maya + Zoe
+  B4: { name: 'Ada', gender: 'female', parts: [['F3', 0.5], ['F4', 0.5]] },        // Nora + Sofia
+  B5: { name: 'Ruth', gender: 'female', parts: [['F4', 0.5], ['F5', 0.5]] },       // Sofia + Zoe
+  B6: { name: 'Felix', gender: 'male', parts: [['M1', 0.5], ['M2', 0.5]] },        // Ethan + Leo
+  B7: { name: 'Jonah', gender: 'male', parts: [['M1', 0.5], ['M3', 0.5]] },        // Ethan + Marcus
+  B8: { name: 'Silas', gender: 'male', parts: [['M2', 0.5], ['M4', 0.5]] },        // Leo + Owen
+  B9: { name: 'Gabriel', gender: 'male', parts: [['M3', 0.5], ['M5', 0.5]] },      // Marcus + Theo
+};
+const SINGLE_VOICES = Object.keys(VOICE_NAMES);
+const voiceLabel = (id) => (BLENDS[id] ? `${BLENDS[id].name} (${BLENDS[id].gender}, blended)` : `${VOICE_NAMES[id] || id} (${id[0] === 'F' ? 'female' : 'male'})`);
+
+module.exports = { VOICE_NAMES, BLENDS, SINGLE_VOICES, voiceLabel, applyPronunciation, LANGS, modelLang, pauseDashes, prepare, breathAt, withBreath, chunks, guessLang };

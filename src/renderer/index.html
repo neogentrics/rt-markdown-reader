@@ -837,6 +837,14 @@ Term
           <label class="field">Play through<select id="pref-output"></select></label>
           <p class="hint-text">This works with the natural voices. The computer's own voices always use its default device.</p>
           <label class="field">Speed<select id="pref-rate"><option value="0.75">0.75×</option><option value="1">1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="1.75">1.75×</option><option value="2">2×</option></select></label>
+          <label class="field">Natural voice pace<select id="pref-pace"><option value="0.95">0.95× (slower)</option><option value="1.05">1.05×</option><option value="1.15">1.15×</option><option value="1.25">1.25×</option><option value="1.35">1.35× (quicker)</option></select></label>
+          <p class="hint-text">How quickly a natural voice speaks to begin with. The Speed above then makes it faster or slower still.</p>
+          <label class="field">Quality<select id="pref-quality"><option value="faster">Faster</option><option value="balanced">Balanced</option><option value="best">Best</option></select></label>
+          <p class="hint-text">Faster is the quickest to make. Balanced is a little richer, and Best is the richest, taking about twice as long as Faster. A computer that can't keep up steps down by itself.</p>
+          <label class="field">Warmth<select id="pref-warmth"><option value="0">Off</option><option value="0.9">0.90</option><option value="0.95">0.95</option><option value="1">1.00</option><option value="1.05">1.05</option><option value="1.1">1.10</option><option value="1.15">1.15</option><option value="1.2">1.20</option></select></label>
+          <p class="hint-text">A gentle tone filter for the natural voices: a little more body, a softer top, and the quiet and loud words brought closer together. At 1.00 the low voice is 3.5 dB fuller, the top above 7 kHz is 3.5 dB softer, and the loudness stays the same.</p>
+          <label class="field">Breathing<select id="pref-breathing"><option value="off">Off</option><option value="reading">At the start and end of a reading</option><option value="paragraphs">At each paragraph</option></select></label>
+          <p class="hint-text">The natural voices can take a breath before they begin and sigh at the end, like a person reading to you. Headings are never given one.</p>
           <div class="prefs-actions"><button type="button" class="link-btn" data-run="read-aloud">Read Aloud</button><button type="button" class="link-btn" data-run="pronunciation">Pronunciation List…</button></div>
           <label class="field">Microphone for dictation<select id="pref-input"></select></label>
           <p class="hint-text">Dictation types what you say while you're editing. It's a free download of about 80 MB the first time you use it, and it works offline.</p>

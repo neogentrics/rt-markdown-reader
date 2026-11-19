@@ -4,6 +4,24 @@ All notable changes to RT Markdown Reader (Neo Markdown Reader until 3.4.1) are 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [3.12.0] - 2026-11-19
+
+Warmer, livelier natural voices.
+
+### Added
+- **Four settings for the natural voices**, in *Preferences → Reading Aloud*. **Natural voice pace** runs from 0.95× to 1.35×, and the Speed in the reading bar still adjusts it. **Quality** is Faster, Balanced or Best (8, 12 or 16 steps for each sentence; Best takes about twice as long as Faster). **Warmth** is a gentle tone filter from 0.90 to 1.20, or off: at 1.00 the low voice is 3.5 dB fuller, the top above 7 kHz is 3.5 dB softer, the quiet and loud words are drawn a little closer, and the loudness is unchanged. **Breathing** gives a breath before the first sentence and a sigh after the last, either once for a reading or around each paragraph, never in a heading. They start at pace 1.15×, Balanced, warmth 1.05 and breathing off, and audio exports use them too.
+- **Nine blended voices.** After the ten natural voices, the list has Elise, Hazel, Lena, Ada and Ruth (female) and Felix, Jonah, Silas and Gabriel (male), marked *blended*. Each is two of the ten mixed half and half when it's first used, on your computer, so there's nothing more to download. They work with pace, quality, warmth and breathing like the others, and in audio exports.
+- A voice lab for choosing by ear: `scripts/voice-lab.mjs` makes comparison clips with the real model, `scripts/voice-lab-page.mjs` makes a page to listen on, and `scripts/voice-measure.mjs` measures pitch movement and brightness. `mixStyles` in `src/main/voice-tone.js` does the blending.
+
+### Changed
+- **A dash is read as a pause.** It used to become a plain hyphen, which the voice reads straight through. A range such as 1990–2000 and a word such as well-known are left as they are.
+- **Less dead air.** The voice model leaves about 0.4 s of silence before every sentence and 0.3 s after, so sentences followed each other about 0.7 s apart, and the first sentence of a reading, made in two halves to start sooner, had the same hole in the middle. Now there's about 0.4 s between sentences and a comma's pause in the middle of the first. Audiobooks add 0.1 s instead of 0.35 s on top.
+- **Slower computers step down by levels.** It used to drop from 8 steps to 5 once and for good. Now it goes 16, 12, 8, 5 as far as it has to, by the middle of the last five sentences, so one slow moment doesn't decide, and it goes back up if the computer keeps up.
+- Natural voices can now be asked for up to 16 steps (it was 12).
+
+### Fixed
+- *No results* in Find wasn't translated into Spanish, French or German.
+
 ## [3.11.0] - 2026-11-18
 
 Working with RT Story Tracker.

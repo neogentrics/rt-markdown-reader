@@ -15,7 +15,9 @@ const { gaussian } = require('../src/main/supertonic.js');
 const { PronunciationStore } = require('../src/main/pronounce.js');
 
 test('voices: text is normalised, symbols are spoken or dropped, and it is tagged with its language', () => {
-  assert.equal(text.prepare('Use the “Run” button — then wait', 'en'), '<en>Use the "Run" button - then wait.</en>');
+  assert.equal(text.prepare('Use the “Run” button — then wait', 'en'), '<en>Use the "Run" button, then wait.</en>', 'a dash is a pause (3.12)');
+  assert.equal(text.prepare('In 1990–2000 a well-known thing - really - happened.', 'en'), '<en>In 1990-2000 a well-known thing, really, happened.</en>', 'ranges and hyphenated words are left alone');
+  assert.equal(text.prepare('Wait--what? Yes — .', 'en'), '<en>Wait, what? Yes.</en>');
   assert.equal(text.prepare('Mail me @ home 😀 !', 'en'), '<en>Mail me at home!</en>');
   // Accents are split from their letters (NFKD), the way the model was trained: "é" is "e" + "◌́".
   assert.equal(text.prepare('¿Qué tal?', 'es'), '<es>¿Qué tal?</es>'.normalize('NFKD'));
@@ -143,10 +145,40 @@ test('voices: a sentence longer than the model reads well is spoken in pieces an
   assert.ok(asked.every((t) => t.length <= 300));
   assert.equal(asked.join(' '), long.trim());
   const voiced = asked.reduce((n, t) => n + t.length, 0);
-  assert.equal(res.samples.length, voiced + 2 * 150, 'the pieces, with 0.15 s between them');
+  assert.equal(res.samples.length, voiced + 2 * 120, 'the pieces, with 0.12 s between them (a comma’s pause, 3.12)');
   assert.equal(res.samples[asked[0].length], 0, 'the breath is silent');
   const short = await s.speak({ text: 'Short one.', lang: 'en', voice: 'F1', speed: 1, steps: 8 });
   assert.equal(short.samples.length, 'Short one.'.length);
+  s.stop();
+});
+
+test('natural voices: the model’s silence is trimmed to head and tail, and warmth is applied once to what comes out (3.12)', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'nmr-voices-'));
+  const rate = 1000;
+  // 400 quiet samples, 600 of sound, 300 quiet: the model's own shape (0.4 s before, 0.3 s after, at 1000 Hz here).
+  const sentence = new Float32Array(1300);
+  for (let i = 400; i < 1000; i++) sentence[i] = 0.3 * Math.sin(i / 5);
+  const fork = () => {
+    const handlers = {};
+    return {
+      on: (ev, fn) => { handlers[ev] = fn; },
+      postMessage: (m) => setImmediate(() => {
+        if (m.type === 'init') handlers.message({ type: 'ready' });
+        if (m.type === 'speak') handlers.message({ type: 'audio', id: m.id, sampleRate: rate, samples: sentence, ms: 5 });
+      }),
+      kill: () => {},
+    };
+  };
+  const s = new VoiceStore({ root, fetch: null, fork, worker: '', fake: true, files: [{ path: 'x.bin', size: 4, sha256: '0'.repeat(64) }] });
+  await s.install();
+  const plain = await s.speak({ text: 'One sentence.', lang: 'en', voice: 'F1', speed: 1, steps: 8, head: 0.1, tail: 0.3 });
+  assert.equal(plain.samples.length, 100 + 600 + 300, 'a tenth of a second before, three tenths after, the rest cut');
+  const tight = await s.speak({ text: 'One sentence.', lang: 'en', voice: 'F1', speed: 1, steps: 8, head: 0.05, tail: 0.08 });
+  assert.equal(tight.samples.length, 50 + 600 + 80);
+  const warmed = await s.speak({ text: 'One sentence.', lang: 'en', voice: 'F1', speed: 1, steps: 8, head: 0.1, tail: 0.3, warmth: 1 });
+  assert.equal(warmed.samples.length, plain.samples.length, 'the filter never changes the length');
+  assert.notDeepEqual([...warmed.samples.slice(300, 320)], [...plain.samples.slice(300, 320)], 'and it does change the sound');
+  assert.ok(warmed.samples.every(Number.isFinite));
   s.stop();
 });
 
@@ -173,4 +205,43 @@ test('pronunciation: a folder nearer the document wins, and folders cover what i
   assert.deepEqual(new PronunciationStore(file).rules(path.join(book, 'c.md')).length, 2, 'kept on disk');
   store.set(part, []);
   assert.equal(store.lists(path.join(part, 'a.md')).folder.list.length, 0);
+});
+
+test('breathing: a breath before the first sentence and a sigh after the last, by reading or by paragraph, never in a heading (3.12)', () => {
+  const p1 = {}, p2 = {}, h = {};
+  const items = [{ block: h, heading: true }, { block: p1 }, { block: p1 }, { block: p2 }];
+  const at = (mode, i, fresh) => text.breathAt(mode, items, i, fresh);
+  assert.deepEqual(at('off', 1, true), { start: false, end: false });
+  // By reading: only where a reading starts (the first sentence, or after a skip) and the document's last sentence.
+  assert.deepEqual(at('reading', 1, true), { start: true, end: false });
+  assert.deepEqual(at('reading', 1, false), { start: true, end: false }, 'reading from the top: the title is read first, then the breath');
+  assert.deepEqual(at('reading', 2, false), { start: false, end: false });
+  assert.deepEqual(at('reading', 3, false), { start: false, end: true });
+  // By paragraph: the first and last sentence of each one.
+  assert.deepEqual(at('paragraphs', 1, false), { start: true, end: false });
+  assert.deepEqual(at('paragraphs', 2, false), { start: false, end: true });
+  assert.deepEqual(at('paragraphs', 3, false), { start: true, end: true }, 'a one-sentence paragraph gets both');
+  assert.deepEqual(at('paragraphs', 2, true), { start: true, end: true }, 'a skip into the middle starts a reading');
+  assert.deepEqual(at('paragraphs', 0, true), { start: false, end: false }, 'a heading is read plainly');
+  assert.equal(text.withBreath('Hello there.', { start: true, end: true }), '<breath> Hello there. <sigh>');
+  assert.equal(text.withBreath('Hello there.', { start: false, end: false }), 'Hello there.');
+});
+
+test('blended voices: each is a half-and-half mix of two real voices, with its own name, and is offered after the ten (3.12)', async () => {
+  const { VOICES } = await import('../src/main/voices.js');
+  const names = [...text.SINGLE_VOICES.map((id) => text.VOICE_NAMES[id]), ...Object.values(text.BLENDS).map((b) => b.name)];
+  assert.equal(new Set(names).size, 19, 'no two voices share a name');
+  assert.deepEqual(VOICES, [...text.SINGLE_VOICES, ...Object.keys(text.BLENDS)]);
+  assert.equal(text.SINGLE_VOICES.length, 10);
+  for (const [id, b] of Object.entries(text.BLENDS)) {
+    assert.match(id, /^B\d$/);
+    assert.equal(b.parts.length, 2);
+    assert.ok(b.parts.every(([part]) => text.SINGLE_VOICES.includes(part)), `${b.name} is made from voices the model ships`);
+    assert.ok(Math.abs(b.parts.reduce((n, [, w]) => n + w, 0) - 1) < 1e-9, `${b.name}’s weights add up to 1`);
+    assert.equal(b.parts[0][0][0], b.parts[1][0][0], `${b.name} mixes two voices of one kind`);
+    assert.equal(b.gender, b.parts[0][0][0] === 'F' ? 'female' : 'male');
+  }
+  assert.equal(text.voiceLabel('B1'), 'Elise (female, blended)');
+  assert.equal(text.voiceLabel('B6'), 'Felix (male, blended)');
+  assert.equal(text.voiceLabel('F1'), 'Clara (female)');
 });
