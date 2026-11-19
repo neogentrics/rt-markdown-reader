@@ -44,7 +44,7 @@ major version, 4.0, is kept for a change to what the app is: the writing studio.
 | [v3.9](#v39--your-home-server) | Your home server | ✅ Released ([3.9.0](https://github.com/neogentrics/rt-markdown-reader/releases/tag/v3.9.0)) |
 | [v3.10](#v310--publish-anywhere) | Publish anywhere | ✅ Released ([3.10.0](https://github.com/neogentrics/rt-markdown-reader/releases/tag/v3.10.0)) |
 | [v3.11](#v311--working-with-rt-story-tracker) | Working with RT Story Tracker | ✅ Released ([3.11.0](https://github.com/neogentrics/rt-markdown-reader/releases/tag/v3.11.0)) |
-| [v3.12](#v312--warmer-livelier-voices) | Warmer, livelier voices | 🔨 In progress |
+| [v3.12](#v312--warmer-livelier-voices) | Warmer, livelier voices | ✅ Released ([3.12.0](https://github.com/neogentrics/rt-markdown-reader/releases/tag/v3.12.0)) |
 | [v3.13](#v313--your-apps-at-a-glance) | Your apps at a glance | Planned |
 | [v4.0](#v40--writing-studio) | Writing studio | Planned |
 | [Later](#later--only-if-needed) | Only if needed | Ideas |
@@ -318,7 +318,7 @@ app learns to talk to them (decision 12).
 
 ## v3.12 — Warmer, livelier voices
 
-🔨 **In progress.** The owner found the natural voices pale and a little sad. Everything here was chosen by ear, from sample clips, before it was built. It is going out in 3.12.0.
+✅ **Released in [3.12.0](https://github.com/neogentrics/rt-markdown-reader/releases/tag/v3.12.0).** The owner found the natural voices pale and a little sad. Everything here was chosen by ear, from sample clips, before it was built.
 
 | Feature | Size | Details |
 |---|:-:|---|

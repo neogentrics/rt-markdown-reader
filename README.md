@@ -780,10 +780,10 @@ On macOS use `Cmd` instead of `Ctrl`. Any of these can be changed under *Prefere
   document has gone.
 - **v3.11** added working with RT Story Tracker: *Send to StoryTracker*, with or without a link, and pictures that
   travel with a document.
+- **v3.12** added warmer, livelier natural voices: a pace, a quality, a warmth and a breathing setting in *Preferences →
+  Reading Aloud*, nine blended voices, less dead air between sentences, and dashes read as pauses.
 
 Coming next:
-- **v3.12 — Warmer, livelier voices:** the natural voices read with more life. A pace, a quality, a warmth and a breathing
-  setting in *Preferences → Reading Aloud*, nine blended voices, less dead air between sentences, and dashes read as pauses.
 - **v3.13 — Your apps at a glance:** a small indicator that shows which other Recon Towers apps are linked, and a
   toolbar you can tidy.
 - **v4.0 — Writing studio:** book projects exported as EPUB, print-ready PDF and Word, Git built in,
