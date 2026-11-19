@@ -142,3 +142,26 @@ Planned, not built. Every app in the suite shows the same small indicator, so th
 - Wording stays the same in every app. Don't invent your own labels.
 
 **Order.** RT Story Tracker builds the shared parts first, in its v3.8 (the installed list, the panel and the shared list). RT Author Desk builds the icon early, since adding it later costs more. RT Markdown Reader follows in its v3.13, together with a toolbar the owner can tidy. RT Press and RT Audio Studio get it when they are built.
+
+## Updates and compatibility
+
+Planned, not built. It goes with the apps status panel above, and it was the owner's idea (2026-11-18): the panel should tell him when a suite app has a newer version.
+
+**What decides whether two apps link.** Their App Link version and the kinds of document each says it accepts (`hello` already returns both), never the app's own version number. Two apps on different releases link fine if the protocol matches. Most releases don't touch App Link, so they must never break a link.
+
+**The one case that blocks.** If the protocols aren't compatible, or a security fix raised the minimum protocol an app will accept, the older app shows **Needs an update to link** in the panel, and no link is made. Nothing else blocks.
+
+**The nudge.** When an installed app has a newer release, the panel shows **Update available** with both numbers (for example, "you have 3.7.1, the latest is 3.9.0"). The button depends on the app: *Open to update* for apps that update themselves (the Windows installer and the Linux AppImage), and *Download* for the rest (Mac, `.deb`, portable). It never stops a link that would otherwise work.
+
+**Where "latest" comes from.** Not GitHub: some of the apps are in private repos, and GitHub limits anonymous checks. The Recon Towers store site already follows each app's releases, so it publishes one small file of latest versions, planned at `https://recontowers.com/apps/versions.json`:
+
+```
+{ "apps": { "rt-markdown-reader": { "version": "3.11.0", "released": "2026-11-18", "url": "https://recontowers.com/apps/rt-markdown-reader/" } } }
+```
+
+- An app reads it only when the panel opens or the app starts, and keeps the answer for a day.
+- It asks for the file and sends nothing about the person: no ids, no list of what's installed.
+- If it can't be reached, the panel says **Couldn't check for updates** and carries on. Being offline never blocks anything.
+- Until the site publishes the file, an app treats it as not available.
+
+**Wording** stays the same in every app: *Update available*, *Needs an update to link*, *Couldn't check for updates*.
