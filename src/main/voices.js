@@ -11,6 +11,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const { chunks } = require('./voice-text');
+const { warm, trimSilence } = require('./voice-tone');
 
 const MODEL = 'supertonic-3';
 const REVISION = 'aafc6e32416a594460b32413efc49d7fe4ce6d46';
@@ -207,9 +208,11 @@ class VoiceStore {
   }
 
   /**
-   * Speak one sentence: { text, lang, voice, speed, steps } → { sampleRate, samples (Float32Array), ms }.
+   * Speak one sentence: { text, lang, voice, speed, steps, warmth, head, tail } → { sampleRate, samples (Float32Array), ms }.
    * The model reads best in pieces of up to ~300 characters (120 in Japanese and Korean), so a longer
    * sentence is read piece by piece, at word boundaries, and the pieces joined with a short breath.
+   * Then the sound is shaped (3.12): the model's silence before and after is cut to `head` and `tail` seconds
+   * (about 0.7 s of dead air between sentences before), and `warmth` (0 = off) is the gentle tone filter of voice-tone.js.
    */
   async speak(job) {
     if (!this.installed()) throw new Error('The natural voices aren’t downloaded');
@@ -220,13 +223,15 @@ class VoiceStore {
     const pieces = chunks(job.text, job.lang === 'ja' || job.lang === 'ko' ? 120 : 300);
     const parts = [];
     for (const text of pieces.length ? pieces : [job.text]) parts.push(await this.speakPiece({ ...job, text }));
-    if (parts.length === 1) return parts[0];
     const { sampleRate } = parts[0];
-    const gap = Math.round(sampleRate * 0.15);
-    const out = new Float32Array(parts.reduce((n, p) => n + p.samples.length, 0) + gap * (parts.length - 1));
+    const head = job.head ?? 0.1, tail = job.tail ?? 0.3;
+    // Between pieces of one sentence the pause is a comma's, not a sentence's.
+    const trimmed = parts.map((p, k) => trimSilence(p.samples, sampleRate, k === 0 ? head : 0.04, k === parts.length - 1 ? tail : 0.08));
+    const gap = parts.length > 1 ? Math.round(sampleRate * 0.12) : 0;
+    const out = new Float32Array(trimmed.reduce((n, s) => n + s.length, 0) + gap * (parts.length - 1));
     let at = 0;
-    for (const p of parts) { out.set(p.samples, at); at += p.samples.length + gap; }
-    return { sampleRate, samples: out, ms: parts.reduce((n, p) => n + p.ms, 0) };
+    for (const s of trimmed) { out.set(s, at); at += s.length + gap; }
+    return { sampleRate, samples: job.warmth > 0 ? warm(out, sampleRate, job.warmth) : out, ms: parts.reduce((n, p) => n + p.ms, 0) };
   }
 
   speakPiece(job) {

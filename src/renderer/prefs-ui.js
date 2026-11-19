@@ -2,6 +2,8 @@
 // here; larger ones open their own window. Buttons run the same commands the menus used to, so anything
 // moved here can still be found with Find a Command and keeps its shortcut.
 
+import { cleanReading } from '../main/voice-tone.js';
+
 const $ = (id) => document.getElementById(id);
 
 export function createPrefsUi({ api, settings, toast, refreshVoices, openHelp }) {
@@ -28,6 +30,11 @@ export function createPrefsUi({ api, settings, toast, refreshVoices, openHelp })
     $('pref-colorsafe').checked = !!s.colorSafe;
     $('pref-width').value = s.pageWidth;
     $('pref-rate').value = String(s.readAloud?.rate ?? 1);
+    const reading = cleanReading(s.readAloud);
+    $('pref-pace').value = String(reading.pace);
+    $('pref-quality').value = reading.quality;
+    $('pref-warmth').value = String(reading.warmth);
+    $('pref-breathing').value = reading.breathing;
     $('pref-wiki').checked = s.wikiLinks === 'markdown';
     $('pref-run').checked = s.runCode !== 'off';
   }

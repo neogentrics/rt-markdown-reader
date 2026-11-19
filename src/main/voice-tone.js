@@ -5,6 +5,8 @@
 //  - warm()         a gentle tone filter after speaking: a little more body, a softer top, light smoothing.
 //  - mixStyles()    a new voice made by blending the style data of voices the model already ships.
 //  - matchLoudness() the same loudness before and after, so a filtered clip isn't "better" just by being louder.
+//  - trimSilence()  the quiet the model leaves before and after every sentence, cut to what a reader wants.
+//  - the reading settings (3.12): pace, quality, warmth and breathing, and how a slow computer steps down.
 
 // ---------------------------------------------------------------------------- tone
 
@@ -86,6 +88,83 @@ function warm(samples, rate, amount = 0.5) {
   return matchLoudness(s, before);
 }
 
+// ---------------------------------------------------------------------------- silence
+
+/**
+ * The model leaves about 0.4 s of digital silence before every sentence and 0.3 s after, so sentences
+ * arrived with a gap of about 0.7 s, and the first sentence of a reading, split in two to start sooner,
+ * had the same hole in the middle. Keep `head` seconds before the first sound and `tail` after the last,
+ * and never add any: a clip with less silence than that is returned as it is.
+ */
+function trimSilence(samples, rate, head = 0.1, tail = 0.3, floor = 0.004) {
+  let first = 0;
+  while (first < samples.length && Math.abs(samples[first]) < floor) first++;
+  if (first === samples.length) return samples;                       // all quiet: nothing to anchor to
+  let last = samples.length - 1;
+  while (last > first && Math.abs(samples[last]) < floor) last--;
+  const from = Math.max(0, first - Math.round(head * rate));
+  const to = Math.min(samples.length, last + 1 + Math.round(tail * rate));
+  return from === 0 && to === samples.length ? samples : samples.slice(from, to);
+}
+
+// ---------------------------------------------------------------------------- reading settings (3.12)
+
+/** Quality is how many refinement steps a sentence gets. Measured: each step costs about 0.1 s per second of speech. */
+const QUALITY = { faster: 8, balanced: 12, best: 16 };
+const QUICK_STEPS = 5;                                                // speech someone is waiting for, and the floor on a slow computer
+const LEVELS = [QUICK_STEPS, QUALITY.faster, QUALITY.balanced, QUALITY.best];
+const PACES = [0.95, 1.05, 1.15, 1.25, 1.35];                         // the model's own speed, as heard in the samples
+const WARMTHS = [0.9, 0.95, 1, 1.05, 1.1, 1.15, 1.2];                // 0 is off
+const BREATHING = ['off', 'reading', 'paragraphs'];
+const DEFAULT_READING = { pace: 1.15, quality: 'balanced', warmth: 1.05, breathing: 'off' };
+
+/** A saved reading preference, made safe: anything unknown becomes the default. */
+function cleanReading(input = {}) {
+  const near = (list, v, fallback) => { const n = Number(v); return Number.isFinite(n) && list.includes(Math.round(n * 100) / 100) ? Math.round(n * 100) / 100 : fallback; };
+  return {
+    pace: near(PACES, input.pace, DEFAULT_READING.pace),
+    quality: Object.hasOwn(QUALITY, input.quality) ? input.quality : DEFAULT_READING.quality,
+    warmth: Number(input.warmth) === 0 ? 0 : near(WARMTHS, input.warmth, DEFAULT_READING.warmth),
+    breathing: BREATHING.includes(input.breathing) ? input.breathing : DEFAULT_READING.breathing,
+  };
+}
+
+/**
+ * How many steps a computer can afford. `perStep` is how long one step took, in seconds of work per second of
+ * speech (so 0.1 means a step costs a tenth of the speech's own length). Speech has to be made faster than it
+ * plays, with room to spare, so the most steps allowed is the largest level that keeps the sentence under
+ * `budget` times real time (0.7, as before). Never fewer than QUICK_STEPS, never more than `wanted`.
+ */
+function affordableSteps(wanted, perStep, budget = 0.7) {
+  if (!(perStep > 0)) return wanted;
+  const fits = LEVELS.filter((n) => n <= wanted && n * perStep <= budget);
+  return fits.length ? Math.max(...fits) : QUICK_STEPS;
+}
+
+/**
+ * Watches how long sentences take to make and says how many steps this computer can afford (see affordableSteps).
+ * It goes by the middle of the last few sentences, so one slow one (the first, while the voice warms up, or a busy
+ * moment) doesn't fix the choice for the whole reading, and a computer that turns out faster is let up again.
+ */
+function stepGovernor(keep = 5) {
+  const seen = [];
+  return {
+    /** A sentence took `ms` to make for `secs` of speech, at `steps` steps. */
+    note(ms, secs, steps) {
+      if (!(ms > 0 && secs > 0 && steps > 0)) return;
+      seen.push(ms / 1000 / secs / steps);
+      if (seen.length > keep) seen.shift();
+    },
+    /** The most steps worth asking for, up to `wanted`. */
+    cap(wanted) {
+      if (!seen.length) return wanted;
+      const sorted = [...seen].sort((a, b) => a - b);
+      return affordableSteps(wanted, sorted[sorted.length >> 1]);
+    },
+    reset() { seen.length = 0; },
+  };
+}
+
 // ---------------------------------------------------------------------------- voices
 
 /**
@@ -122,4 +201,4 @@ function seeded(seed) {
   };
 }
 
-module.exports = { biquad, filter, smooth, rms, peak, matchLoudness, warm, mixStyles, seeded };
+module.exports = { biquad, filter, smooth, rms, peak, matchLoudness, warm, mixStyles, seeded, trimSilence, QUALITY, QUICK_STEPS, LEVELS, PACES, WARMTHS, BREATHING, DEFAULT_READING, cleanReading, affordableSteps, stepGovernor };

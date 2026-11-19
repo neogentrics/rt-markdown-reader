@@ -18,6 +18,9 @@ const GROUPS = {
   '6-recipes': ['6. Recipes', 'The settings put together. NOW is what the app does today. These recipes are my guesses until you listen: tell me which is closest.'],
   '7-blended-voices': ['7. Blended voices', 'New voices made by mixing the ones the model already has. All use the WARM-LIVELY recipe. “single-voice” clips are the original voices at the same recipe, so you can compare.'],
 };
+GROUPS['A-new-defaults-vs-before'] = ['A. New defaults, against how the app sounded before', 'Each sentence twice, in Clara and Ethan: BEFORE 3.12, and with the NEW defaults (pace 1.15, quality Balanced, warmth 1.05). Made the way the app makes it.'];
+GROUPS['B-a-passage'] = ['B. A passage of four sentences', 'Listen to the gaps between sentences (BEFORE has about 0.7 s of silence, NEW about 0.4 s), then to the two Breathing choices in Clara.'];
+GROUPS['C-the-start-of-a-reading'] = ['C. The start of a reading', 'The first sentence of a reading, as the app starts it: made in two halves so the voice can begin sooner. Listen for the voice starting low and rising, and for the stall in the middle.'];
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 let html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">

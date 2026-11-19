@@ -3,11 +3,12 @@
 // to disk a sentence at a time, and the finished file only appears at the end.
 import { collectSentences } from './read-ui.js';
 import { m4bStart, m4bEnd, id3 } from './m4b.js';
-import { modelLang, guessLang, applyPronunciation, voiceLabel } from '../main/voice-text.js';
+import { modelLang, guessLang, applyPronunciation, voiceLabel, breathAt, withBreath } from '../main/voice-text.js';
+import { cleanReading, QUALITY } from '../main/voice-tone.js';
 
 const $ = (id) => document.getElementById(id);
 const NATURAL = 'natural:';
-const GAP_SECONDS = 0.35;               // between sentences
+const GAP_SECONDS = 0.1;                // between sentences, on top of the 0.4 s the voice leaves around each one (3.12; it was 0.35 on top of 0.7)
 const HEADING_GAP_SECONDS = 0.9;        // before a heading
 const AAC_BITRATE = 96000;
 const MP3_KBPS = 64;
@@ -155,10 +156,10 @@ export function createAudioUi({ api, toast, activeTab, settings, reading }) {
   }
 
   /** One sentence's sound, made again if read aloud stopped the voice in the meantime. */
-  async function sound(line, lang, voiceId, speed, cancelled) {
+  async function sound(line, lang, voiceId, how, cancelled) {
     for (;;) {
       if (cancelled()) return null;
-      const res = await api.voiceSpeak({ text: line, lang, voice: voiceId, speed, steps: 8 });
+      const res = await api.voiceSpeak({ text: line, lang, voice: voiceId, speed: how.speed, steps: how.steps, warmth: how.warmth });
       if (res?.error !== 'cancelled') {
         if (!res || res.error) throw new Error(res?.error || 'The voice stopped');
         return res;
@@ -167,7 +168,7 @@ export function createAudioUi({ api, toast, activeTab, settings, reading }) {
   }
 
   async function make(tab, format, voiceId) {
-    const items = collectSentences(tab.el).map((it) => ({ text: it.text, heading: it.heading, level: Number(it.block.tagName?.[1]) || 0, title: it.heading ? it.block.textContent.trim() : '' }));
+    const items = collectSentences(tab.el).map((it) => ({ block: it.block, text: it.text, heading: it.heading, level: Number(it.block.tagName?.[1]) || 0, title: it.heading ? it.block.textContent.trim() : '' }));
     if (!items.length) { toast('There’s no text to read here'); return; }
     const lang = modelLang(tab.el.lang || guessLang(items.slice(0, 80).map((it) => it.text).join(' ')) || 'en');
     if (!lang) { toast('The natural voices don’t read this language yet'); return; }
@@ -184,8 +185,11 @@ export function createAudioUi({ api, toast, activeTab, settings, reading }) {
     const say = (text) => { $('audio-job-text').textContent = text; };
     say('Making audio… 0%');
     const list = await api.sayRules(tab.doc.path || null);
-    const words = items.map((it) => applyPronunciation(it.text, list));
-    const speed = 1.05 * (Number(settings().readAloud?.rate) || 1);
+    // The same pace, warmth and breathing as when reading aloud. Quality is as chosen: a file isn't waiting to be heard,
+    // so a slow computer takes longer rather than making it worse (Best takes about twice as long as Faster).
+    const mine = cleanReading(settings().readAloud);
+    const words = items.map((it, i) => withBreath(applyPronunciation(it.text, list), breathAt(mine.breathing, items, i, i === 0)));
+    const how = { speed: mine.pace * (Number(settings().readAloud?.rate) || 1), steps: QUALITY[mine.quality], warmth: mine.warmth };
     // Chapters are the top two levels of heading the document uses.
     const levels = [...new Set(items.filter((it) => it.heading).map((it) => it.level))].sort().slice(0, 2);
     const total = words.reduce((n, w) => n + w.length, 0);
@@ -197,7 +201,7 @@ export function createAudioUi({ api, toast, activeTab, settings, reading }) {
       const t0 = performance.now();
       const ahead = new Map();
       const get = (i) => {
-        if (i < words.length && !ahead.has(i)) ahead.set(i, sound(words[i], lang, voiceId, speed, cancelled));
+        if (i < words.length && !ahead.has(i)) ahead.set(i, sound(words[i], lang, voiceId, how, cancelled));
         return ahead.get(i);
       };
       for (let i = 0; i < words.length && !state.cancelled; i++) {

@@ -1,7 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
-const { warm, mixStyles, seeded, rms, peak, matchLoudness } = createRequire(import.meta.url)('../src/main/voice-tone.js');
+const tone = createRequire(import.meta.url)('../src/main/voice-tone.js');
+const { warm, mixStyles, seeded, rms, peak, matchLoudness } = tone;
 
 const RATE = 44100;
 const sine = (hz, seconds = 0.5, amp = 0.2) => Float32Array.from({ length: Math.round(RATE * seconds) }, (_, i) => amp * Math.sin((2 * Math.PI * hz * i) / RATE));
@@ -74,4 +75,55 @@ test('seeded noise repeats, and differs between seeds', () => {
   assert.deepEqual(a, b);
   assert.notDeepEqual(a, c);
   assert.ok(a.every((v) => v >= 0 && v < 1));
+});
+
+test('trimSilence: keeps head before the first sound and tail after the last, and never adds quiet', () => {
+  const rate = 1000;
+  const clip = new Float32Array(1300);
+  for (let i = 400; i < 1000; i++) clip[i] = 0.3;
+  assert.equal(tone.trimSilence(clip, rate, 0.1, 0.3).length, 100 + 600 + 300);
+  assert.equal(tone.trimSilence(clip, rate, 0.1, 0.05).length, 100 + 600 + 50);
+  assert.equal(tone.trimSilence(clip, rate, 1, 1), clip, 'asking for more quiet than there is returns the clip as it is');
+  const quiet = new Float32Array(500);
+  assert.equal(tone.trimSilence(quiet, rate), quiet, 'a clip with no sound is left alone');
+  const tight = new Float32Array(100).fill(0.2);
+  assert.equal(tone.trimSilence(tight, rate, 0.1, 0.3), tight);
+});
+
+test('reading settings: pace, quality, warmth and breathing are made safe, and a missing setting gets the default', () => {
+  assert.deepEqual(tone.cleanReading(undefined), tone.DEFAULT_READING);
+  assert.deepEqual(tone.cleanReading({ pace: '1.25', quality: 'best', warmth: 0, breathing: 'paragraphs' }), { pace: 1.25, quality: 'best', warmth: 0, breathing: 'paragraphs' });
+  assert.deepEqual(tone.cleanReading({ pace: 3, quality: 'ultra', warmth: 9, breathing: 'always' }), tone.DEFAULT_READING, 'out-of-range values fall back');
+  assert.equal(tone.cleanReading({ warmth: '1.2' }).warmth, 1.2);
+  assert.equal(tone.cleanReading({ warmth: 1.07 }).warmth, tone.DEFAULT_READING.warmth, 'only the offered warmths');
+  assert.ok(tone.PACES.includes(tone.DEFAULT_READING.pace) && tone.WARMTHS.includes(tone.DEFAULT_READING.warmth));
+  assert.deepEqual(tone.QUALITY, { faster: 8, balanced: 12, best: 16 });
+});
+
+test('affordableSteps: a slow computer steps down through the levels, never below the quick five, never above what was asked', () => {
+  // 0.1 is this VM: each step costs a tenth of the speech's length.
+  assert.equal(tone.affordableSteps(16, 0.1), 5);
+  assert.equal(tone.affordableSteps(16, 0.04), 16);       // 16 × 0.04 = 0.64 of real time
+  assert.equal(tone.affordableSteps(16, 0.05), 12);       // 16 × 0.05 = 0.8 is too slow; 12 × 0.05 = 0.6 fits
+  assert.equal(tone.affordableSteps(12, 0.07), 8);
+  assert.equal(tone.affordableSteps(8, 0.01), 8, 'not more than was asked for');
+  assert.equal(tone.affordableSteps(16, 0.5), 5, 'a very slow computer still gets the quick five');
+  assert.equal(tone.affordableSteps(12, 0), 12, 'no measurement yet: what was asked for');
+});
+
+test('stepGovernor: goes by the middle of the last few sentences, so one slow one does not decide, and it can let steps back up', () => {
+  const g = tone.stepGovernor(3);
+  assert.equal(g.cap(16), 16, 'nothing measured yet');
+  g.note(5000, 5, 5);                        // 0.2 per step: the first sentence, slow while the voice warms up
+  assert.equal(g.cap(16), 5);
+  g.note(2000, 5, 12);                       // 0.033 per step
+  g.note(2200, 5, 12);
+  assert.equal(g.cap(16), 16, 'the middle of the three is fast, so full quality');
+  g.note(5000, 5, 12);                       // a busy moment: 0.083 per step
+  g.note(5000, 5, 12);
+  assert.equal(g.cap(16), 8, 'two slow in a row do bring it down');
+  g.note(0, 5, 12); g.note(100, 0, 12); g.note(100, 5, 0);
+  assert.equal(g.cap(16), 8, 'a measurement that makes no sense is ignored');
+  g.reset();
+  assert.equal(g.cap(12), 12);
 });

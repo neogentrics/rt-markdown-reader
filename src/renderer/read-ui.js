@@ -1,7 +1,8 @@
 // Read, listen (2.4): read aloud with the computer's own voices, focus mode, folding sections under their
 // headings, and hover previews of footnotes and of links to other documents.
 // Natural voices (3.2): read aloud with the Supertonic voices, made on this computer (src/main/voices.js).
-import { modelLang, guessLang, applyPronunciation, voiceLabel } from '../main/voice-text.js';
+import { modelLang, guessLang, applyPronunciation, voiceLabel, breathAt, withBreath } from '../main/voice-text.js';
+import { cleanReading, stepGovernor, QUALITY, QUICK_STEPS } from '../main/voice-tone.js';
 
 const $ = (id) => document.getElementById(id);
 const NATURAL = 'natural:';
@@ -161,7 +162,13 @@ export function createReadUi(ctx) {
   // ---------------------------------------------------------------- natural voices (3.2)
   let natural = { installed: false, downloading: false, done: 0, total: 0, voices: [] };
   let naturalLang = null;               // the model's language code for the document being read, or null
-  let steps = 8;                        // fewer on a slower computer (see speakNatural)
+  // How the natural voices are read (3.12): pace, quality (steps), warmth and breathing, from Preferences → Reading Aloud.
+  const reading = () => cleanReading(ctx.settings().readAloud);
+  const governor = stepGovernor();      // how many steps this computer can keep up with, from how long sentences take
+  const stepsUsed = new Map();          // sentence index -> the steps it was made with
+  const wantSteps = () => governor.cap(QUALITY[reading().quality]);
+  const voiceId = () => els.voice.value.slice(NATURAL.length);
+  const pace = () => reading().pace * (Number(els.rate.value) || 1);
   const audio = new Map();              // sentence index -> Promise<{ samples, sampleRate } | { error }>
   let player = null;                    // the sentence playing now: { stop }
   const isNatural = () => els.voice.value.startsWith(NATURAL) && natural.installed;
@@ -197,17 +204,22 @@ export function createReadUi(ctx) {
   api.voiceStatus?.().then((s) => { natural = s; fillVoices(); });
   api.onVoiceProgress?.((s) => { natural = s; fillVoices(); });
 
-  const QUICK_STEPS = 5;       // for speech someone is waiting for
+  /** One piece of speech. `extra` trims the silence around it (head, tail in seconds). */
+  function speech(text, n, extra = {}) {
+    return api.voiceSpeak({ text, lang: naturalLang, voice: voiceId(), speed: pace(), steps: n, warmth: reading().warmth, ...extra });
+  }
 
-  function speech(text, n) {
-    return api.voiceSpeak({ text, lang: naturalLang, voice: els.voice.value.slice(NATURAL.length), speed: 1.05 * (Number(els.rate.value) || 1), steps: n });
+  /** What's said for sentence i: its text, said the way the pronunciation list says, with a breath or a sigh if Breathing is on. */
+  function spoken(i, fresh = false) {
+    return withBreath(applyPronunciation(items[i].text, sayList), breathAt(reading().breathing, items, i, fresh));
   }
 
   /** Ask for (and remember) the audio of sentence i. Two sentences ahead are made while one plays. */
-  function synthesize(i) {
+  function synthesize(i, fresh = false) {
     if (i >= items.length || audio.has(i)) return audio.get(i);
-    const rate = Number(els.rate.value) || 1;
-    const p = api.voiceSpeak({ text: applyPronunciation(items[i].text, sayList), lang: naturalLang, voice: els.voice.value.slice(NATURAL.length), speed: 1.05 * rate, steps: i === index ? Math.min(steps, 5) : steps });
+    const n = i === index ? Math.min(wantSteps(), QUICK_STEPS) : wantSteps();
+    stepsUsed.set(i, n);
+    const p = speech(spoken(i, fresh), n);
     audio.set(i, p);
     return p;
   }
@@ -251,6 +263,7 @@ export function createReadUi(ctx) {
     player?.stop();
     player = null;
     audio.clear();
+    stepsUsed.clear();
     api.voiceCancel?.();
   }
 
@@ -260,10 +273,13 @@ export function createReadUi(ctx) {
     // Nothing made yet (just started, or skipped here): get a voice going as soon as possible.
     let rest = null;
     if (!audio.has(index)) {
-      const text = applyPronunciation(item.text, sayList);
+      const text = spoken(index, true);
       const parts = openingOf(text);
-      audio.set(index, speech(parts ? parts[0] : text, Math.min(steps, QUICK_STEPS)));
-      if (parts) rest = speech(parts[1], Math.min(steps, QUICK_STEPS));
+      const quick = Math.min(wantSteps(), QUICK_STEPS);
+      stepsUsed.set(index, quick);
+      // The two halves of a long opening sentence meet at a comma: a comma's pause between them, not a sentence's.
+      audio.set(index, speech(parts ? parts[0] : text, quick, parts ? { tail: 0.15 } : {}));
+      if (parts) rest = speech(parts[1], quick, { head: 0.05 });
     }
     const res = await synthesize(index);
     if (mine !== gen || !playing) return;
@@ -275,9 +291,9 @@ export function createReadUi(ctx) {
       speakAt(index);
       return;
     }
-    // A computer that makes speech slower than about 0.7× real time gets fewer refinement steps.
+    // A computer that makes speech slower than about 0.7× real time gets fewer refinement steps (in levels: 16, 12, 8, 5).
     const secs = res.samples.length / res.sampleRate;
-    if (res.ms / 1000 > secs * 0.7 && steps > 5) steps = 5;
+    governor.note(res.ms, secs, stepsUsed.get(index));
     for (let k = 1; k <= 2; k++) synthesize(index + k);
     window.__lastNatural = { index, text: item.text, secs, waited: performance.now() - t0 };     // read by the end-to-end tests
     player = play(res.samples, res.sampleRate);
@@ -293,6 +309,7 @@ export function createReadUi(ctx) {
       }
     }
     audio.delete(index);
+    stepsUsed.delete(index);
     if (mine === gen && playing && player === p) speakAt(index + 1);
   }
 
@@ -496,9 +513,18 @@ export function createReadUi(ctx) {
   $('speak-prev-para').onclick = () => jumpParagraph(-1);
   $('speak-next-para').onclick = () => jumpParagraph(1);
   const saveConf = () => api.setSettings({ readAloud: { rate: Number(els.rate.value) || 1, voice: els.voice.value } });
-  const restart = () => { audio.clear(); api.voiceCancel?.(); if (playing) speakAt(index); };
+  const restart = () => { audio.clear(); stepsUsed.clear(); api.voiceCancel?.(); if (playing) speakAt(index); };
   els.rate.onchange = () => { saveConf(); restart(); };
   $('pref-rate').onchange = () => { els.rate.value = $('pref-rate').value; saveConf(); restart(); };
+  // The natural voices' own settings (3.12). Each is saved by itself, and a reading in progress carries on in the new way.
+  for (const [id, key] of [['pref-pace', 'pace'], ['pref-quality', 'quality'], ['pref-warmth', 'warmth'], ['pref-breathing', 'breathing']]) {
+    $(id).onchange = async () => {
+      const value = key === 'quality' || key === 'breathing' ? $(id).value : Number($(id).value);
+      await api.setSettings({ readAloud: { [key]: value } });
+      if (key === 'quality') governor.reset();
+      restart();
+    };
+  }
   $('pref-voice').onchange = () => { const v = $('pref-voice').value; chosen = els.voice.value; els.voice.value = v; els.voice.onchange(); };
   let chosen = els.voice.value;
   els.voice.onfocus = () => { chosen = els.voice.value; };
@@ -741,7 +767,7 @@ export function createReadUi(ctx) {
     async sayAloud(text) {
       if (!text.trim()) return;
       if (isNatural()) {
-        const res = await api.voiceSpeak({ text, lang: naturalLang || 'en', voice: els.voice.value.slice(NATURAL.length), speed: 1.05, steps: 5 });
+        const res = await api.voiceSpeak({ text, lang: naturalLang || 'en', voice: voiceId(), speed: reading().pace, steps: QUICK_STEPS, warmth: reading().warmth });
         if (res?.samples) play(res.samples, res.sampleRate);
         return;
       }

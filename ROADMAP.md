@@ -44,6 +44,7 @@ major version, 4.0, is kept for a change to what the app is: the writing studio.
 | [v3.9](#v39--your-home-server) | Your home server | ✅ Released ([3.9.0](https://github.com/neogentrics/rt-markdown-reader/releases/tag/v3.9.0)) |
 | [v3.10](#v310--publish-anywhere) | Publish anywhere | ✅ Released ([3.10.0](https://github.com/neogentrics/rt-markdown-reader/releases/tag/v3.10.0)) |
 | [v3.11](#v311--working-with-rt-story-tracker) | Working with RT Story Tracker | ✅ Released ([3.11.0](https://github.com/neogentrics/rt-markdown-reader/releases/tag/v3.11.0)) |
+| [v3.12](#v312--warmer-livelier-voices) | Warmer, livelier voices | 🔨 In progress |
 | [v3.13](#v313--your-apps-at-a-glance) | Your apps at a glance | Planned |
 | [v4.0](#v40--writing-studio) | Writing studio | Planned |
 | [Later](#later--only-if-needed) | Only if needed | Ideas |
@@ -314,6 +315,21 @@ app learns to talk to them (decision 12).
 | ✅ 🙋 Send to StoryTracker | S | In the File menu, with or without a link. With a link it goes across. With no link, or with RT Story Tracker closed, it starts RT Story Tracker with a temporary `.md`, which is removed afterwards. A password-locked document is never sent. |
 | ✅ Pictures on App Link | S | Optional `attachments` on `open_document`, both ways: pictures go with a document, show straight away when one arrives, and move beside it when it's saved. |
 | ✅ App Link rules | S | `docs/app-link.md` adds `attachments` and `kind`, the road with no link, and which app starts the other. |
+
+## v3.12 — Warmer, livelier voices
+
+🔨 **In progress.** The owner found the natural voices pale and a little sad. Everything here was chosen by ear, from sample clips, before it was built. It waits for the owner to confirm the defaults.
+
+| Feature | Size | Details |
+|---|:-:|---|
+| 🙋 Pace | S | A setting for how quickly a natural voice speaks, from 0.95× to 1.35×, in *Preferences → Reading Aloud*. The Speed in the reading bar still adjusts it. |
+| 🙋 Quality | S | Faster, Balanced or Best: 8, 12 or 16 refinement steps. A computer that can't keep up steps down by itself and goes back up if it catches up. |
+| 🙋 Warmth | S | A gentle tone filter after the voice is made (more body, a softer top, light smoothing, the same loudness): 0.90 to 1.20, or off. Our own filter, in `src/main/voice-tone.js`. |
+| 🙋 Breathing | S | The model's own breath and sigh tags: at the start and end of a reading, or around each paragraph. Never in a heading. Off to begin with. |
+| Dashes as pauses | S | A dash is read as a pause instead of a plain hyphen. Ranges and hyphenated words are left alone. |
+| Less dead air | S | The model's silence before and after every sentence is cut, so sentences follow each other in about 0.4 s instead of 0.7 s, and the first sentence of a reading has no hole in the middle. |
+| Voice lab | S | `scripts/voice-lab.mjs` makes comparison clips of any setting with the real model, so the next change can be chosen by ear too. |
+| Blended voices | M | Not built yet. New voices made by mixing the ten (`mixStyles` in `src/main/voice-tone.js` is ready), waiting for the owner to hear them. |
 
 ## v3.13 — Your apps at a glance
 

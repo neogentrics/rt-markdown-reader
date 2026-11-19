@@ -13,7 +13,9 @@ const require = createRequire(import.meta.url);
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const { Supertonic, voiceStyle } = require('../src/main/supertonic.js');
 const { VOICE_NAMES } = require('../src/main/voice-text.js');
-const { warm, mixStyles, seeded, matchLoudness } = require('../src/main/voice-tone.js');
+const { warm, mixStyles, seeded, matchLoudness, trimSilence, DEFAULT_READING, QUALITY } = require('../src/main/voice-tone.js');
+const { breathAt, withBreath } = require('../src/main/voice-text.js');
+const { openingOf } = await import('../src/renderer/read-ui.js');
 const { measure } = await import('./voice-measure.mjs');
 
 const arg = (name, fallback) => { const i = process.argv.indexOf(`--${name}`); return i > 0 ? process.argv[i + 1] : fallback; };
@@ -174,6 +176,71 @@ if (wanted('blends')) {
       const id = `blend:${label}`;
       await clip('7-blended-voices', id, s, BEST, 'BLEND', direct ? `a voice made from ${label.toLowerCase()}` : `${label} mixed half and half`, { spec, label });
     }
+  }
+}
+
+// ------------------------------------------------------------------ 4. confirm: the 3.12 defaults, made the way the app makes them
+// One sentence the way the app speaks it. `how.old` is the app before 3.12: 8 steps (5 to start), pace 1.05, the model's own
+// silence left in, no filter. Otherwise the defaults (pace 1.15, 12 steps, silence trimmed to 0.1 s before and 0.3 s after, warmth 1.05).
+const CONFIRM_SEED = 4242;
+async function appSentence(text, voiceId, how = {}) {
+  const old = !!how.old;
+  const o = old ? { steps: 8, quickSteps: 5, pace: 1.05, warmth: 0 } : { steps: QUALITY[DEFAULT_READING.quality], quickSteps: 5, pace: DEFAULT_READING.pace, warmth: DEFAULT_READING.warmth, ...how };
+  const say = how.tags ? withBreath(text, how.tags) : text;
+  const parts = how.start ? openingOf(say) : null;                         // a sentence that opens a reading is made in two halves
+  const rate = tts.sampleRate;
+  const make = async (t, steps, seed) => tts.speak(t, { lang: 'en', style: styleOf(voiceId), speed: o.pace, steps, random: seeded(seed) });
+  if (!parts) {
+    const samples = await make(say, how.start ? o.quickSteps : o.steps, CONFIRM_SEED);
+    return old ? samples : warm(trimSilence(samples, rate, 0.1, 0.3), rate, o.warmth);
+  }
+  const a = await make(parts[0], o.quickSteps, CONFIRM_SEED);
+  const b = await make(parts[1], o.quickSteps, CONFIRM_SEED + 1);
+  if (old) { const out = new Float32Array(a.length + b.length); out.set(a); out.set(b, a.length); return out; }   // played one after the other, silences and all
+  const ta = trimSilence(a, rate, 0.1, 0.15), tb = trimSilence(b, rate, 0.05, 0.3);
+  const out = new Float32Array(ta.length + tb.length); out.set(ta); out.set(tb, ta.length);
+  return warm(out, rate, o.warmth);
+}
+// Sentences one after another, as the app plays them: back to back, each with the quiet it carries.
+const join = (list) => { const out = new Float32Array(list.reduce((n, s) => n + s.length, 0)); let at = 0; for (const s of list) { out.set(s, at); at += s.length; } return out; };
+
+if (wanted('confirm')) {
+  console.log('8 confirm');
+  const calm = SENTENCES.A.text.replace(/\s*—\s*/g, ', ');
+  const SAME = { A: calm, B: SENTENCES.B.text.replace(/\s*—\s*/g, ', '), C: SENTENCES.C.text };
+  const saveApp = (group, name, samples, info) => save(group, name, samples, info);
+  for (const voiceId of ['F1', 'M1']) {
+    const who = voiceName(voiceId);
+    for (const k of ['A', 'B', 'C']) for (const old of [true, false]) {
+      saveApp('A-new-defaults-vs-before', `${k}-${SENTENCES[k].name}__${who}__${old ? 'BEFORE' : 'NEW-defaults'}`, await appSentence(SAME[k], voiceId, { old }),
+        { s: k, voice: who, setting: old ? 'before' : 'new defaults', note: old ? 'BEFORE 3.12: 8 steps, pace 1.05, no warmth, the model’s own silence around the sentence' : 'NEW defaults: 12 steps, pace 1.15, warmth 1.05, less silence around the sentence', text: SAME[k] });
+    }
+  }
+  const paragraphs = [
+    ['The morning light came slowly through the window.', 'Nothing moved in the house, and the kettle had not yet begun to sing.', 'She stood there for a long moment, listening.'],
+    ['Then, from somewhere below, came the sound of a door.'],
+  ];
+  const flat = paragraphs.flatMap((p, pi) => p.map((text) => ({ text, block: pi })));
+  const passage = async (voiceId, how, mode) => {
+    const list = [];
+    for (let i = 0; i < flat.length; i++) list.push(await appSentence(flat[i].text, voiceId, { ...how, tags: breathAt(mode, flat, i, i === 0) }));
+    return join(list);
+  };
+  for (const voiceId of ['F1', 'M1']) {
+    const who = voiceName(voiceId);
+    const text = paragraphs.flat().join(' ');
+    saveApp('B-a-passage', `P-passage__${who}__BEFORE`, await passage(voiceId, { old: true }, 'off'), { s: 'P', voice: who, setting: 'before', note: 'BEFORE: four sentences, about 0.7 s of silence between each', text });
+    saveApp('B-a-passage', `P-passage__${who}__NEW-defaults`, await passage(voiceId, {}, 'off'), { s: 'P', voice: who, setting: 'new defaults', note: 'NEW defaults: the same four sentences, about 0.4 s between each', text });
+  }
+  saveApp('B-a-passage', 'P-passage__Clara__NEW-breathing-start-and-end', await passage('F1', {}, 'reading'), { s: 'P', voice: 'Clara', setting: 'breathing: start and end of a reading', note: 'NEW defaults + Breathing “At the start and end of a reading”: a breath before the first sentence, a sigh after the last', text: paragraphs.flat().join(' ') });
+  saveApp('B-a-passage', 'P-passage__Clara__NEW-breathing-each-paragraph', await passage('F1', {}, 'paragraphs'), { s: 'P', voice: 'Clara', setting: 'breathing: each paragraph', note: 'NEW defaults + Breathing “At each paragraph”: a breath and a sigh around each of the two paragraphs', text: paragraphs.flat().join(' ') });
+  // The start of a reading: a long first sentence is made in two halves so the voice can begin sooner.
+  const opening = 'On the first cold morning of the autumn, when the lake had gone grey and the geese were leaving, she finally opened the letter.';
+  for (const voiceId of ['F1', 'M1']) {
+    const who = voiceName(voiceId);
+    saveApp('C-the-start-of-a-reading', `S-opening__${who}__BEFORE`, await appSentence(opening, voiceId, { old: true, start: true }), { s: 'S', voice: who, setting: 'before', note: 'BEFORE: the first sentence of a reading as the app made it: two halves, with the model’s silence in the middle', text: opening });
+    saveApp('C-the-start-of-a-reading', `S-opening__${who}__NEW-defaults`, await appSentence(opening, voiceId, { start: true }), { s: 'S', voice: who, setting: 'new defaults', note: 'NEW: the same two halves with the middle closed up to a comma’s pause, and 12 steps', text: opening });
+    saveApp('C-the-start-of-a-reading', `S-opening__${who}__NEW-with-a-breath`, await appSentence(opening, voiceId, { start: true, tags: { start: true, end: false } }), { s: 'S', voice: who, setting: 'new defaults + a breath', note: 'NEW + a breath before the first word (Breathing on)', text: `<breath> ${opening}` });
   }
 }
 

@@ -25,4 +25,4 @@ Click the export button in the toolbar, or open **File → Export**:
 
 [Export as audio](#do=export-audio)
 
-It uses your reading speed and pronunciation list. It runs in the background, with its progress in the corner of the window, and you can keep working. A long book can take hours. Audiobooks can't be made on Linux, so it offers MP3 there.
+It uses your reading speed, pronunciation list, and the natural voice's pace, quality, warmth and breathing from [Preferences → Reading Aloud](#do=preferences:voices). It runs in the background, with its progress in the corner of the window, and you can keep working. A long book can take hours. Audiobooks can't be made on Linux, so it offers MP3 there.

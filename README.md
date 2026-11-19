@@ -432,7 +432,11 @@ voices** instead: ten of them, five female and five male, that sound like someon
 - **Offline and private:** every sentence is made on your computer. Nothing you read is sent anywhere, and
   they work without an internet connection.
 - **Smooth:** each sentence is made in the background while the one before it is read, so there are no
-  pauses between sentences. A slower computer automatically gets a slightly faster setting.
+  pauses between sentences. A slower computer automatically steps down to a faster setting, one level at a time.
+- **Your own sound:** *Preferences → Reading Aloud* has four settings for the natural voices: **pace** (0.95× to
+  1.35×), **quality** (Faster, Balanced or Best), **warmth** (a gentle tone filter, 0.90 to 1.20, or off) and
+  **breathing** (a breath before a reading or a paragraph, and a sigh after). The same settings are used when you
+  export audio.
 - **Languages:** English, Spanish, French and German, and 27 more (Arabic, Dutch, Hindi, Italian, Japanese,
   Korean, Polish, Portuguese, Russian, Swedish, Turkish, Ukrainian, Vietnamese…). The language comes from
   the document's front matter (`lang: es`) or is recognised from its words. A language the natural voices
@@ -777,6 +781,8 @@ On macOS use `Cmd` instead of `Ctrl`. Any of these can be changed under *Prefere
   travel with a document.
 
 Coming next:
+- **v3.12 — Warmer, livelier voices:** the natural voices read with more life. A pace, a quality, a warmth and a breathing
+  setting in *Preferences → Reading Aloud*, less dead air between sentences, and dashes read as pauses.
 - **v3.13 — Your apps at a glance:** a small indicator that shows which other Recon Towers apps are linked, and a
   toolbar you can tidy.
 - **v4.0 — Writing studio:** book projects exported as EPUB, print-ready PDF and Word, Git built in,
