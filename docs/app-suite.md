@@ -165,3 +165,31 @@ Planned, not built. It goes with the apps status panel above, and it was the own
 - Until the site publishes the file, an app treats it as not available.
 
 **Wording** stays the same in every app: *Update available*, *Needs an update to link*, *Couldn't check for updates*.
+
+## Look and feel in every app
+
+Every app should feel like the same family. RT Markdown Reader is the reference, because it's the furthest along: where this page says what to do, Reader already does it, and an app should copy its wording and layout rather than invent its own. Where an app has no use for something, build the small version or leave it out and say so in its roadmap. This was written on 2026-11-19, after RT Story Tracker's menus and theme button were found to look unfinished next to Reader's.
+
+**Menus.** File, Edit, View and Help, plus others as the app needs them. Keep each menu short: Reader's tests cap File at 20 items, and commands that aren't used often go in a submenu (for example *File → This Document*). Every command can also be run by name from the command palette (`Ctrl+K`, then `>`), and shortcuts can be changed.
+
+**The Help menu.** In this order: *Help Center* (`F1`), *Tutorial*, *Check for Updates…*, then *About <App name> <version>*.
+
+**Help Center.** A home page with the tutorial, quick links and common questions, then numbered guides that can be searched. A guide can have a button that jumps straight to the setting it explains. Guides are plain Markdown files in a `help` folder, so each app's guides read like the others.
+
+**Tutorial.** A hands-on tour with a practice item, offered the first time the app opens. It can be skipped, resumed, and replayed from *Help*. People who update from an older version get it too, because the app checks whether it was finished.
+
+**About window.** The icon, the app's name and its version (marked *portable* if it is). Four links with a line of explanation each: *Website* (the app's page on recontowers.com), *What's new in this version* (the release notes), *Report a problem or suggest a feature* (the repo's issues), and *Source code*. A line with the Electron, Chromium and Node versions and the operating system, and a *Copy details* button, so a bug report can include them. At the bottom: "© <year> Recon Towers. All rights reserved.", with links to the *License* and the *Open-source notices*.
+
+**Preferences.** One window (`Ctrl+,`) holds every setting, in sections. A setting that's moved there stays reachable by name from the command palette. This is what keeps the menus short.
+
+**Themes and fonts.** The shared themes (Paper, Sepia, Night, Mist, Forest, Dusk, High Contrast, Blue, Red and Yellow), *Follow System*, the *Glass* look, the *Colour-safe* option for colour blindness, *Customize Theme* for your own colours, and the shared choice of fonts. The theme button is visible on the main screen, not buried. A test measures the contrast of every theme.
+
+**The toolbar.** Icon buttons, each with a name that shows on hover and is read out by screen readers. Only the commonly used ones are there, and the rest are in the menus. Reader's v3.13 makes the toolbar adjustable (hide, reorder, shrink, names beside icons), and the other apps copy that when it exists. The apps status icon sits at the right end.
+
+**Updates.** Where the system allows it, the app updates itself: a message says "Version X is ready to install" with a *Restart to update* button. Where it can't (Mac, the `.deb`, the portable build), the message links to the download.
+
+**Accessibility.** Every button has a name, every theme meets WCAG AA contrast, Windows high contrast works, and everything can be done from the keyboard. This is checked automatically in the tests, not by eye.
+
+**Languages.** All the app's own words live in one table per feature, with Spanish, French and German and right-to-left layouts supported. Product names are marked so they aren't translated.
+
+**Wording.** Plain, short, and the same everywhere: *Open*, *Save*, *Restart to update*, *Check for Updates…*. If Reader already has a label for it, use that one.
