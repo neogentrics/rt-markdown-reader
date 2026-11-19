@@ -108,3 +108,37 @@ These fields are optional, and an app that doesn't know them ignores them.
 - A name taken from outside, such as an `id`, is never used as a file name unless it's checked first.
 
 The first idea for this, from the Recon Browser side, used an `rtstory://` link and a shared inbox folder. It's kept as a reference, but the rules above replace its transport.
+
+## Apps status in every app
+
+Planned, not built. Every app in the suite shows the same small indicator, so the owner can see what is linked at a glance. It was his idea (2026-11-18), and it is the Apps panel from "Still to add" above with a place to see it.
+
+**Where.** A small icon at the right end of the toolbar, or the app's nearest equivalent, with a coloured dot and the name *Recon Towers apps* on hover and for screen readers. Clicking it opens the panel. The icon only summarises: the panel carries the words, so colour is never the only signal.
+
+| Dot | Means |
+|---|---|
+| Green | At least one other app is linked |
+| Amber | Other apps were found, but none is linked |
+| Grey | No other app was found |
+| Off | App Link is off. The panel says so and offers to turn it on. |
+
+**The panel.** It lists every app in the suite, from one shared list (id, name and a short line), with one of these states and its button:
+
+| State | Button |
+|---|---|
+| Linked | Open |
+| Found, not linked | Link |
+| Installed, not running | Open |
+| Not installed | Get it (opens that app's page on the Recon Towers store) |
+
+**Rules.**
+
+- Finding an app never links it. *Link* asks for the same one-time approval as in [app-link.md](app-link.md).
+- No constant checking. The panel looks when it opens, when the app starts, and when *Refresh* is pressed.
+- An app counts as installed only if its `installed/<id>.json` exists and the `launch` path in it still exists. That guards against an uninstall that left the file behind.
+- An app counts as running if its presence file is there and answers `hello`.
+- Only linked apps are asked for `status`, and a locked project says nothing about itself.
+- The shared list is kept in this repo's docs and copied into each app. A new app appears in every app's panel by an ordinary update.
+- Wording stays the same in every app. Don't invent your own labels.
+
+**Order.** RT Story Tracker builds the shared parts first, in its v3.8 (the installed list, the panel and the shared list). RT Author Desk builds the icon early, since adding it later costs more. RT Markdown Reader follows in its v3.13, together with a toolbar the owner can tidy. RT Press and RT Audio Studio get it when they are built.
