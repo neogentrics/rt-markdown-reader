@@ -4,6 +4,14 @@ All notable changes to RT Markdown Reader (Neo Markdown Reader until 3.4.1) are 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [3.13.0] - Unreleased
+
+A Metallic finish.
+
+### Added
+- **The Metallic look.** A third *Look* beside Solid and Glass, in the theme button, *Preferences → Appearance* and *View → Look*. It gives the toolbar, tabs, sidebar, dialogs, pop-ups, find bar and read-aloud bar a brushed-metal finish: a highlight along the top fading to a darker band, a light line on top edges and a dark one below, a drop shadow, raised buttons, a glossier main button and active tab, and recessed text boxes. It works on top of every theme and with colours chosen in *Customize Theme*, and how strong each layer is follows the lightness of the text on that surface, so light themes get a soft sheen and dark ones a deep one (Sepia, Blue and Red have a dark toolbar under a light page, and are handled the same way). The page and the editor stay flat. So do printing, exports, High Contrast, forced colours and a computer set for more contrast.
+- **A contrast test for it.** The accessibility checker (axe) can't judge text over a gradient, and counts it as a pass. `test/e2e/metallic.e2e.cjs` measures instead: it hides the text, takes a picture of the window, and tests each control's real text colour against the darkest and lightest background behind its words, in all ten themes and two sets of Customize Theme colours, with a deliberate-failure case to show it catches a bad finish. The accessibility test now also runs Glass on all ten themes (it was four) and Metallic on all ten.
+
 ## [3.12.0] - 2026-11-19
 
 Warmer, livelier natural voices.

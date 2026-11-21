@@ -11,7 +11,7 @@ const path = require('node:path');
 const DEFAULTS = Object.freeze({
   theme: 'system',        // system | light | dark | sepia | mist | forest | dusk | contrast | blue | red | yellow
   font: 'sans',           // one of FONTS
-  surface: 'solid',       // solid | glass
+  surface: 'solid',       // solid | metallic | glass
   colorSafe: false,       // colours that stay apart with colour blindness
   fontScale: 1,           // 0.7 – 1.8
   pageWidth: 'normal',    // narrow | normal | wide | full
@@ -164,7 +164,7 @@ function sanitize(input) {
   if (!input || typeof input !== 'object') return s;
   if (THEMES.includes(input.theme) || /^addon:[a-z0-9][a-z0-9-]{1,39}:[a-z0-9][a-z0-9-]{1,39}$/.test(input.theme || '')) s.theme = input.theme;
   if (FONTS.includes(input.font)) s.font = input.font;
-  if (['solid', 'glass'].includes(input.surface)) s.surface = input.surface;
+  if (['solid', 'metallic', 'glass'].includes(input.surface)) s.surface = input.surface;
   if (WIDTHS.includes(input.pageWidth)) s.pageWidth = input.pageWidth;
   for (const k of ['showToc', 'showMenuBar', 'restoreSession', 'claudeConnector', 'appLink', 'colorSafe']) if (typeof input[k] === 'boolean') s[k] = input[k];
   const scale = Number(input.fontScale);
