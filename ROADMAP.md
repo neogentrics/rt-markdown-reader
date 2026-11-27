@@ -47,6 +47,7 @@ major version, 4.0, is kept for a change to what the app is: the writing studio.
 | [v3.12](#v312--warmer-livelier-voices) | Warmer, livelier voices | ✅ Released ([3.12.0](https://github.com/neogentrics/rt-markdown-reader/releases/tag/v3.12.0)) |
 | [v3.13](#v313--metallic-finish) | Metallic finish | ✅ Released ([3.13.0](https://github.com/neogentrics/rt-markdown-reader/releases/tag/v3.13.0)) |
 | [v3.14](#v314--your-apps-at-a-glance) | Your apps at a glance | Planned |
+| [v3.15](#v315--writing-patterns) | Writing patterns | Planned |
 | [v4.0](#v40--writing-studio) | Writing studio | Planned |
 | [Later](#later--only-if-needed) | Only if needed | Ideas |
 | [Ongoing](#ongoing--polish--distribution) | Polish & distribution | Ongoing |
@@ -354,6 +355,16 @@ Metallic is layered gradients, not blur: a light highlight along the top, a dark
 |---|:-:|---|
 | 🙋 Apps status | M | A small indicator in the toolbar that says whether other Recon Towers apps are **linked**, **found but not linked**, or **not installed**. Click it to see every app in the suite: installed or not, running or not, linked or not, with buttons to link it or open it. Finding an app never links it: you approve once, as now. If App Link is off, it says so and offers to turn it on. Needs the installed list and Apps panel planned in [docs/app-suite.md](docs/app-suite.md), which RT Story Tracker builds first (its v3.8). New apps appear here by an update, with no change to how the rest works. It also shows when an installed app has a newer version, with a button to update it or download it. Whether two apps can link is decided by their App Link versions, not their app versions, so an ordinary release never breaks a link. |
 | 🙋 A toolbar you control | M | Hide, reorder and shrink the buttons on the right, show a name beside each icon if you want, and add a *Read Aloud* button, which is only in the View menu today. Anything hidden stays in the menus and in `Ctrl+K`. |
+
+## v3.15 — Writing patterns
+
+🙋 Find the habits that make writing sound machine-made, so you can fix them. Raised by the owner on 2026-11-27, for every app that edits text (see `docs/app-suite.md`). **Not started, and not scheduled until the owner says go.**
+
+| Feature | Size | Details |
+|---|:-:|---|
+| 🙋 Writing patterns check | M | Finds repeated words and phrases, repeated sentence openings, very even sentence lengths and stock phrases, with the reason for each. It runs on your computer with no AI. Each one is a mark you accept, reject or ignore, and none is applied by itself. |
+| 🙋 Your own banned phrases | M | A list kept per folder, counted across a whole folder or series, and shared with the other Recon Towers apps. It can be exported as a "never write these" block for an AI session. |
+| AI pass (optional) | S | For what rules can't see, with your own AI service or a local model. Off until you turn it on. |
 
 ## v4.0 — Writing studio
 

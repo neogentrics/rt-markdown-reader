@@ -217,3 +217,30 @@ Today `hello` returns `accepts`, and in every app it reads `['markdown', 'text']
 - A sender only offers a kind-specific action when the other app's `kinds` lists it. Otherwise the button is greyed out and says why ("RT Story Tracker 3.10 or later is needed", or "Not supported by this app yet"), instead of sending something that will be ignored.
 - It is an addition to protocol v1, so older apps keep working: they just don't announce anything. It goes in `app-link.md` when it is agreed.
 - Each app lists its own `kinds` in its README and keeps a test that `hello` and the table agree.
+
+## Writing patterns in every app that edits text
+
+Raised by the owner on 2026-11-27. **Not scheduled: no session starts on it until the owner says go.** Each app's session adds it to its own roadmap, where it fits. It is an important feature.
+
+**What it is.** A *Writing patterns* check in every app where a person writes or edits text. It finds the patterns that make writing sound machine-made or careless, so the person can correct, edit or keep each one. The owner's reason: someone weak at grammar may use AI to fix their writing, and AI leaves habits behind: the same words and phrases again and again, stock phrases, writing that is too even and too tidy. People should be able to see those and make the text sound like themselves.
+
+**Two layers.**
+
+1. **A local check, no AI.** It runs on the computer, offline and free, and every flag says why ("used 6 times in this chapter"). It finds repeated words and phrases within a stretch of text, repeated sentence openings, very even sentence lengths, stock phrases and constructions that AI overuses, and the person's own banned phrases. This does most of the work, and it is built first.
+2. **An optional AI pass,** for what rules can't see. It works with the person's own choice of service, including a local model, and is off until turned on, like every other AI feature in the suite.
+
+**The person's own list.** A list of phrases the person never wants to see ("he reached for his sword with two fingers"), kept per folder or project, like the pronunciation list in RT Markdown Reader. It is also counted across a whole book or series, so a habit that appears forty times is visible. The list can be exported as a "never write these" block to paste into an AI session, so the same list fixes the text and stops the habit at the source.
+
+**Rules for every app.**
+
+- Flags show as marks the person accepts, rejects or ignores, never applied automatically. Ignoring one remembers it.
+- Each rule can be turned off, and the starter list of patterns is editable.
+- The banned-phrase list is kept once for all apps, in the shared per-user App Link folder, like the shared themes, so a phrase added in one app is flagged in the others.
+- The app doesn't promise to get past AI detectors. Detectors are unreliable and change, so the claim would not hold. The check is for repeats, stock phrases and sounding like the person, which also lowers the tells.
+- Words stay on the computer. Nothing is sent anywhere unless the person turns on the AI pass.
+
+**Which apps.** RT Markdown Reader and RT Story Tracker first; RT Author Desk (blurbs and promo copy) and RT Audio Studio (scripts) next. RT Press and Recon Browser have no use for it.
+
+**Where it fits in Reader.** After the look update and v3.14, as its own feature release (v3.15), not 4.0. Grammar checking in the style of Word's Editor (passive voice, grammar) is a separate gap; check what the app does today before promising it.
+
+**One shared engine** (the rules, the starter list and the tests), taken in the same way as the shared themes file, is the likely way to keep every app identical. Not decided.
