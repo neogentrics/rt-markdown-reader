@@ -141,7 +141,7 @@ Planned, not built. Every app in the suite shows the same small indicator, so th
 - The shared list is kept in this repo's docs and copied into each app. A new app appears in every app's panel by an ordinary update.
 - Wording stays the same in every app. Don't invent your own labels.
 
-**Order.** RT Story Tracker builds the shared parts first, in its v3.8 (the installed list, the panel and the shared list). RT Author Desk builds the icon early, since adding it later costs more. RT Markdown Reader follows in its v3.13, together with a toolbar the owner can tidy. RT Press and RT Audio Studio get it when they are built.
+**Order.** RT Story Tracker builds the shared parts first, in its v3.8 (the installed list, the panel and the shared list). RT Author Desk builds the icon early, since adding it later costs more. RT Markdown Reader follows in its v3.14, together with a toolbar the owner can tidy. RT Press and RT Audio Studio get it when they are built.
 
 ## Updates and compatibility
 
@@ -182,9 +182,9 @@ Every app should feel like the same family. RT Markdown Reader is the reference,
 
 **Preferences.** One window (`Ctrl+,`) holds every setting, in sections. A setting that's moved there stays reachable by name from the command palette. This is what keeps the menus short.
 
-**Themes and fonts.** The shared themes (Paper, Sepia, Night, Mist, Forest, Dusk, High Contrast, Blue, Red and Yellow), *Follow System*, the *Glass* look, the *Colour-safe* option for colour blindness, *Customize Theme* for your own colours, and the shared choice of fonts. The theme button is visible on the main screen, not buried. A test measures the contrast of every theme.
+**Themes and fonts.** The shared themes (Paper, Sepia, Night, Mist, Forest, Dusk, High Contrast, Blue, Red and Yellow), *Follow System*, the *Solid*, *Metallic* and *Glass* looks (the page and editor stay flat in all three), the *Colour-safe* option for colour blindness, *Customize Theme* for your own colours, and the shared choice of fonts. The theme button is visible on the main screen, not buried. A test measures the contrast of every theme.
 
-**The toolbar.** Icon buttons, each with a name that shows on hover and is read out by screen readers. Only the commonly used ones are there, and the rest are in the menus. Reader's v3.13 makes the toolbar adjustable (hide, reorder, shrink, names beside icons), and the other apps copy that when it exists. The apps status icon sits at the right end.
+**The toolbar.** Icon buttons, each with a name that shows on hover and is read out by screen readers. Only the commonly used ones are there, and the rest are in the menus. Reader's v3.14 makes the toolbar adjustable (hide, reorder, shrink, names beside icons), and the other apps copy that when it exists. The apps status icon sits at the right end.
 
 **Updates.** Where the system allows it, the app updates itself: a message says "Version X is ready to install" with a *Restart to update* button. Where it can't (Mac, the `.deb`, the portable build), the message links to the download.
 
