@@ -204,7 +204,7 @@ One table, so no app promises a button that the other end can't answer. The owne
 | RT Story Tracker | 3.10.0 | Documents to RT Markdown Reader | Documents with a `kind`: `chapter`, `record`, `page`, `note` and `research`. A research clip goes into its Research book through the inbox | |
 | Recon Browser | 1.10.0 | Research clips (`open_document` with `kind: "research"`), built by `src/main/clip-builder.js` and sent by `src/main/app-link.js` | Documents (`markdown`, `text`) | Sends no other kind |
 | RT Author Desk | 1.2.0 | Nothing yet | Nothing yet | It finds installed apps (`src/main/installed.js`); no document exchange is built |
-| RT Press | 0.1.0 | Nothing yet | Nothing yet | Design only |
+| RT Press | 0.1.0-alpha.0 (pre-release, 2026-11-23) | Nothing yet | Nothing yet | No App Link code yet. The app itself has a working window for import, set, check and preview. The `kinds` proposal is in its roadmap (v1.7), waiting for the owner |
 | RT Audio Studio | 0.0.0 | Nothing yet | Nothing yet | Design only; building is paused |
 
 ## Apps say what they do with each kind
