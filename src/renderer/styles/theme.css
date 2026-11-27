@@ -571,29 +571,3 @@
    strikethroughs, so they don't rest on colour alone. test/colors.test.mjs measures these. */
 :root[data-colors="safe"] { --add-fill: #0072b2; --del-fill: #d55e00; --add-text: #005a8e; --del-text: #a84a00; }
 :root[data-colors="safe"][data-tone="dark"] { --add-text: #6cb6ff; --del-text: #ffa45c; }
-
-/* Glass: any theme, with its panels and page frosted over colour. Never for printing or exports, and not with
-   High Contrast, or for people who've asked their computer for less transparency. */
-@media screen and (prefers-reduced-transparency: no-preference) {
-  :root[data-surface="glass"]:not([data-theme="contrast"]) {
-    body { background: var(--glass-desk); }
-    :is(.toolbar, .tabstrip, .sidebar) {
-      background: color-mix(in srgb, var(--page) 46%, transparent);
-      backdrop-filter: blur(22px) saturate(1.6);
-      border-color: color-mix(in srgb, #fff 22%, transparent);
-    }
-    .page {
-      background: color-mix(in srgb, var(--page) 86%, transparent);
-      backdrop-filter: blur(26px) saturate(1.4);
-      box-shadow: inset 0 0 0 1px color-mix(in srgb, #fff 30%, transparent), 0 16px 48px -12px rgba(0, 0, 0, .35);
-    }
-    :is(dialog, .popover) {
-      background: color-mix(in srgb, var(--page) 88%, transparent);
-      backdrop-filter: blur(26px) saturate(1.5);
-    }
-    .speak-bar {
-      background: color-mix(in srgb, var(--inverse-bg) 82%, transparent);
-      backdrop-filter: blur(18px) saturate(1.5);
-    }
-  }
-}

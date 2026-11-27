@@ -4,6 +4,24 @@ All notable changes to RT Markdown Reader (Neo Markdown Reader until 3.4.1) are 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [3.13.1] - Unreleased
+
+Richer Metallic and Glass.
+
+### Changed
+- **Metallic is deeper.** Toolbar buttons are properly bevelled plates (a dark edge, a bright line along the top, a shaded lower lip and a shadow) instead of pale outlines. Dialogs and pop-ups are brushed in five bands of light and shade running corner to corner. The main buttons are glossier, the current tab's accent stripe runs its whole width, text boxes on light themes are crisp white instead of shaded grey, and the search box is set into the find bar.
+- **Glass is a material of its own.** Every toolbar button is now a small pane with a soft edge, a bright top line and a shadow. The bars, dialogs and pop-ups have a white sheen, a stronger frost and deeper shadows, the current tab is a raised pane, the main buttons sit under glass, and the search boxes have a glow in your accent colour. With colours chosen in *Customize Theme*, the panels keep the sheen over your colour.
+- Both now follow the finish in Recon Browser, another of our own apps, as far as the text stays readable. On Night, Forest and Dusk, Metallic dialogs use the same five strengths of light and shade. On the themes with light dialogs (Paper, Sepia, Mist, Blue, Red and Yellow), its values would drop text in Preferences as low as 3.36:1 (it needs 4.5:1), so Reader's are gentler there.
+- Toolbar buttons on both looks use the full-strength text colour.
+- Glass now also steps aside for forced colours and for a computer set for more contrast, as Metallic does.
+
+### Fixed
+- With Glass on the Mist theme, the names of the sidebar's tabs were a little too faint (4.13:1; they need 4.5:1).
+- With Metallic, the find bar drew a second box inside itself.
+
+### Tests
+- The contrast test now measures Glass too: every theme, both sets of *Customize Theme* colours, and that it stays flat when it should.
+
 ## [3.13.0] - 2026-11-26
 
 A Metallic finish.

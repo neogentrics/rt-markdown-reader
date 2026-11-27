@@ -1,7 +1,9 @@
-/* Metallic (3.13): a brushed-metal finish for the app's own chrome, on top of any theme. Layered gradients, not blur:
-   a light highlight along the top edge, a darker band through the middle, a soft light band near the bottom, a one-pixel
-   light line on the top edges and a dark one on the bottom, a drop shadow, borders mixed toward white, and recessed text
-   boxes (a dark inset shadow with a light lip). Our own version of the finish Recon Browser has.
+/* Metallic (3.13, deepened in 3.13.1): a brushed-metal finish for the app's own chrome, on top of any theme. Layered
+   gradients, not blur. Bars: a light highlight along the top edge, a darker band through the middle and a soft reflection at
+   the bottom, with a one-pixel light line on the top edges and a dark one on the bottom. Dialogs and pop-ups: five bands of
+   light and shade running diagonally, which is what makes it read as brushed metal. Buttons are raised plates with a drop
+   shadow, borders are mixed toward white, and text boxes are recessed: crisp white on a light surface, shaded on a dark one.
+   The strengths follow the finish Recon Browser has (another of our own apps), as far as the text stays readable.
 
    Recon Browser's is written for dark themes, with fixed white and black layers. Reader has light themes, and themes whose
    toolbar is dark under a light page (Sepia, Blue, Red). So how strong each layer is comes from the lightness of the text
@@ -25,26 +27,41 @@
      surface (l about .3, a dark text: top .78) and a dark one (l about .75 or more, a light text: top .10) each want; the numbers between are a straight line from one to the other.
      They're made where they're used, so the read-aloud bar and a dialog each make their own. */
   :root[data-surface="metallic"]:not([data-theme="contrast"]) :is(.toolbar, .tabstrip, .sidebar, .speak-bar, .audio-job, dialog.shortcuts, .popover, .find-bar, .palette, .tab.active, .seg button.active, input, select, textarea, .seg) {
-    --m-top: oklch(from var(--m-ink) 1 0 0 / clamp(.10, calc(1.213 - 1.444 * l), .78));         /* the highlight along the top */
-    --m-top-2: oklch(from var(--m-ink) 1 0 0 / clamp(.03, calc(.34 - .4 * l), .22));              /* where it has faded to */
-    --m-band: oklch(from var(--m-ink) .15 0 0 / clamp(.07, calc(-.057 + .422 * l), .26));      /* the darker band through the middle */
-    --m-low: oklch(from var(--m-ink) 1 0 0 / clamp(.05, calc(.533 - .644 * l), .34));           /* the soft light band near the bottom */
-    --m-edge: oklch(from var(--m-ink) .15 0 0 / clamp(.13, calc(-.05 + .6 * l), .40));       /* the dark edge at the very bottom */
-    --m-line-hi: oklch(from var(--m-ink) 1 0 0 / clamp(.42, calc(1.303 - 1.178 * l), .95));     /* the one-pixel line on the top edges */
-    --m-line-lo: oklch(from var(--m-ink) .15 0 0 / clamp(.22, calc(-.067 + .956 * l), .65));    /* and the dark one on the bottom edges */
+    --m-top: oklch(from var(--m-ink) 1 0 0 / clamp(.14, calc(1.22 - 1.444 * l), .80));         /* the highlight along the top of a bar */
+    --m-top-2: oklch(from var(--m-ink) 1 0 0 / clamp(.04, calc(.34 - .4 * l), .22));              /* where it has faded to */
+    --m-band: oklch(from var(--m-ink) .15 0 0 / clamp(.07, calc(-.05 + .422 * l), .26));      /* the darker band through the middle */
+    --m-low: oklch(from var(--m-ink) 1 0 0 / clamp(.08, calc(.533 - .644 * l), .34));           /* the soft reflection at the bottom */
+    --m-btn-hi: oklch(from var(--m-ink) 1 0 0 / clamp(.16, calc(1.233 - 1.444 * l), .80));     /* a button's top */
+    --m-btn-lo: oklch(from var(--m-ink) .15 0 0 / clamp(.10, calc(.033 + .222 * l), .20));    /* and its bottom */
+    /* The five bands of a brushed panel, corner to corner: light, nearly clear, shade, light again, shade. A light
+       surface can take much less shade than a dark one before its grey words get hard to read. */
+    --m-brush-1: oklch(from var(--m-ink) 1 0 0 / clamp(.12, calc(1.093 - 1.311 * l), .70));
+    --m-brush-2: oklch(from var(--m-ink) 1 0 0 / clamp(.03, calc(.313 - .378 * l), .20));
+    --m-brush-3: oklch(from var(--m-ink) .15 0 0 / clamp(.07, calc(-.017 + .289 * l), .20));
+    --m-brush-4: oklch(from var(--m-ink) 1 0 0 / clamp(.08, calc(.537 - .622 * l), .38));
+    --m-brush-5: oklch(from var(--m-ink) .15 0 0 / clamp(.09, calc(-.05 + .467 * l), .30));
+    --m-line-hi: oklch(from var(--m-ink) 1 0 0 / clamp(.40, calc(1.303 - 1.178 * l), .95));     /* the one-pixel line on the top edges */
+    --m-line-lo: oklch(from var(--m-ink) .15 0 0 / clamp(.22, calc(-.067 + .956 * l), .40));    /* and the dark one on the bottom edges */
     --m-drop: oklch(from var(--m-ink) .15 0 0 / clamp(.20, calc(.667 * l), .50));
-    --m-well: oklch(from var(--m-ink) .15 0 0 / clamp(.20, calc(-.067 + .889 * l), .60));              /* the shadow inside a recessed text box */
-    --m-lip: oklch(from var(--m-ink) 1 0 0 / clamp(.16, calc(1.31 - 1.533 * l), .85));         /* and the light lip under it */
+    --m-deep: oklch(from var(--m-ink) .1 0 0 / clamp(.35, calc(.083 + .889 * l), .75));          /* the long shadow under a dialog */
+    --m-field-hi: oklch(from var(--m-ink) 1 0 0 / clamp(.06, calc((.6 - l) * 4), .95));          /* a text box: white on a light surface */
+    --m-field-lo: oklch(from var(--m-ink) 1 0 0 / clamp(0, calc((.6 - l) * 4), .70));
+    --m-field-shade: oklch(from var(--m-ink) .15 0 0 / clamp(0, calc((l - .55) * .9), .14));      /* shaded toward the bottom on a dark one */
+    --m-well: oklch(from var(--m-ink) .15 0 0 / clamp(.12, calc(-.033 + .511 * l), .35));             /* the shadow inside a recessed text box */
+    --m-lip: oklch(from var(--m-ink) 1 0 0 / clamp(.15, calc(1.4 - 1.667 * l), .90));            /* and the light lip under it */
     --m-rim: color-mix(in srgb, var(--chrome-border) 55%, #fff 45%);
-    /* A bar: highlight, band, light band, edge, by proportion. A panel: the same, by distance from its edges, so a tall
-       dialog gets a bright top and a soft bottom rather than a bright half. */
-    --m-sheen-bar: linear-gradient(180deg, var(--m-top) 0%, var(--m-top-2) 28%, var(--m-band) 58%, var(--m-low) 88%, var(--m-edge) 100%);
-    /* A button on a bar: lighter than the bar, which it sits on, or the two highlights add up. */
-    --m-sheen-btn: linear-gradient(180deg, var(--m-top-2) 0%, transparent 46%, var(--m-band) 100%);
-    --m-sheen-panel:
+    --m-btn-rim: oklch(from var(--m-ink) .15 0 0 / clamp(.24, calc(-.06 + .62 * l), .45));     /* a plate's edge is dark: a pale one all round flattens the bevel */
+    --m-bevel: oklch(from var(--m-ink) .1 0 0 / clamp(.14, calc(-.05 + .45 * l), .34));        /* the shaded lower lip of a plate */
+    /* A bar: highlight, band, reflection, by proportion. A panel: five bands, corner to corner. */
+    --m-sheen-bar: linear-gradient(180deg, var(--m-top) 0%, var(--m-top-2) 30%, var(--m-band) 70%, var(--m-low) 100%);
+    /* A button on a bar: a plate of its own, lit from above. */
+    --m-sheen-btn: linear-gradient(180deg, var(--m-btn-hi) 0%, var(--m-top-2) 50%, var(--m-btn-lo) 100%);
+    --m-sheen-panel: linear-gradient(135deg, var(--m-brush-1) 0%, var(--m-brush-2) 30%, var(--m-brush-3) 60%, var(--m-brush-4) 80%, var(--m-brush-5) 100%);
+    /* The sidebar is tall and narrow, where diagonal bands would turn into stripes: lit from the top, shaded at the foot. */
+    --m-sheen-side:
       linear-gradient(180deg, var(--m-top) 0, var(--m-top-2) 56px, transparent 120px),
-      linear-gradient(0deg, var(--m-edge) 0, var(--m-low) 28px, transparent 90px),
-      linear-gradient(180deg, transparent 120px, var(--m-band) 50%, transparent calc(100% - 90px));
+      linear-gradient(0deg, var(--m-band) 0, var(--m-low) 28px, transparent 90px),
+      linear-gradient(100deg, transparent 20%, var(--m-brush-2) 48%, transparent 76%);
   }
 
   :root[data-surface="metallic"]:not([data-theme="contrast"]) {
@@ -59,17 +76,22 @@
     /* its buttons: raised plates, tinted toward their own text so they're lighter on a dark bar and darker on a light one */
     .tb-btn:not(.tb-primary, :disabled) {
       background: var(--m-sheen-btn), color-mix(in srgb, var(--m-ink) 7%, transparent);
-      border: 1px solid var(--m-rim);
-      box-shadow: inset 0 1px 0 var(--m-line-hi), 0 1px 4px var(--m-drop);
+      border: 1px solid var(--m-btn-rim);
+      box-shadow: inset 0 1px 0 var(--m-line-hi), inset 0 -2px 2px -1px var(--m-bevel), 0 2px 5px var(--m-drop);
     }
+    .toolbar .tb-btn:not(.tb-primary, :disabled) { color: var(--heading); }   /* full-strength words and icons on a plate */
     .tb-btn:not(.tb-primary, :disabled):hover { filter: brightness(1.12); }
     .tb-btn:not(.tb-primary, :disabled):active { box-shadow: inset 0 2px 4px var(--m-well); filter: brightness(.94); }
     .tb-btn:disabled { border: 1px solid transparent; }
-    /* the main button: the accent colour, glossier */
-    .tb-primary {
-      background: linear-gradient(180deg, rgba(255, 255, 255, .15) 0%, rgba(255, 255, 255, .03) 48%, rgba(0, 0, 0, .16) 100%), var(--accent-fill, var(--accent));
-      border: 1px solid color-mix(in srgb, var(--accent-fill, var(--accent)) 65%, #fff 35%);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6), 0 2px 6px var(--m-drop);
+    /* the main buttons: the accent colour with a high gloss. White words on it can take less white over them than dark
+       ones can, so the gloss goes by the lightness of the button's own words. */
+    .tb-primary, .big-btn {
+      --m-gloss-hi: oklch(from var(--on-fill, var(--on-accent)) 1 0 0 / clamp(.14, calc(.40 - .26 * l), .28));
+      --m-gloss-mid: oklch(from var(--on-fill, var(--on-accent)) 1 0 0 / clamp(.02, calc(.11 - .09 * l), .08));
+      --m-gloss-lo: oklch(from var(--on-fill, var(--on-accent)) .1 0 0 / clamp(.12, calc(.25 * l), .25));
+      background: linear-gradient(180deg, var(--m-gloss-hi) 0%, var(--m-gloss-mid) 50%, var(--m-gloss-lo) 100%), var(--accent-fill, var(--accent));
+      border: 1px solid color-mix(in srgb, var(--accent-fill, var(--accent)) 70%, #fff 30%);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6), 0 2px 6px rgba(0, 0, 0, .35);
     }
 
     /* tabs: the one you're on is a brighter, glossier plate */
@@ -78,10 +100,11 @@
       border-color: var(--m-rim);
       box-shadow: inset 0 1px 0 var(--m-line-hi), inset 1px 0 0 var(--m-line-hi), inset -1px 0 0 var(--m-line-hi);
     }
+    .tab.active::after { left: 0; right: 0; height: 2px; }   /* the accent stripe, the whole width of the tab */
 
     /* the sidebar */
     .sidebar {
-      background: var(--m-sheen-panel), var(--sidebar-fill);
+      background: var(--m-sheen-side), var(--sidebar-fill);
       border-right-color: var(--m-rim);
       box-shadow: inset -1px 0 0 var(--m-line-hi), 3px 0 12px var(--m-drop);
     }
@@ -91,7 +114,7 @@
     :is(dialog.shortcuts, .popover, .find-bar, .palette) {
       background: var(--m-sheen-panel), var(--page);
       border-color: var(--m-rim);
-      box-shadow: inset 0 1px 1px var(--m-line-hi), inset -1px 0 0 var(--m-line-hi), 0 20px 50px -10px var(--m-drop);
+      box-shadow: inset 0 1px 1px var(--m-line-hi), inset -1px 0 0 var(--m-line-hi), 0 20px 50px -8px var(--m-deep);
     }
 
     /* the read-aloud bar and the export progress */
@@ -106,14 +129,14 @@
     }
     :is(.speak-bar, .audio-job) select { background: var(--m-sheen-bar), color-mix(in srgb, var(--inverse-bg) 86%, var(--inverse-fg)); }
 
-    /* text boxes, lists and the segmented switches are recessed: dark inside, a light lip below */
+    /* text boxes, lists and the segmented switches are recessed: a shadow inside the top, a light lip below */
     :is(.shortcuts, .popover, .sidebar, .find-bar, .palette) :is(input:not([type="checkbox"], [type="radio"], [type="range"], [type="color"]), select, textarea),
     .seg {
-      background: linear-gradient(180deg, var(--m-well) 0%, transparent 55%), var(--code-bg);
+      background: linear-gradient(180deg, var(--m-field-hi) 0%, var(--m-field-lo) 100%), linear-gradient(180deg, transparent 0%, var(--m-field-shade) 100%), var(--code-bg);
       border-color: var(--m-rim);
-      box-shadow: inset 0 2px 3px var(--m-well), 0 1px 0 var(--m-lip);
+      box-shadow: inset 0 2px 4px var(--m-well), 0 1px 0 var(--m-lip);
     }
-    .seg button.active { background: var(--m-sheen-bar), var(--page); box-shadow: inset 0 1px 0 var(--m-line-hi), 0 1px 3px var(--m-drop); }
-    .find-bar input { background: transparent; box-shadow: none; border: 0; }
+    .find-bar input { border: 1px solid var(--m-rim); border-radius: 8px; padding: 5px 10px; }   /* the search box: set into the bar */
+    .seg button.active { background: linear-gradient(180deg, var(--m-top-2) 0%, transparent 50%, var(--m-band) 100%), var(--page); box-shadow: inset 0 1px 0 var(--m-line-hi), 0 1px 3px var(--m-drop); }
   }
 }
