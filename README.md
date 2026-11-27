@@ -793,9 +793,9 @@ On macOS use `Cmd` instead of `Ctrl`. Any of these can be changed under *Prefere
   measures the contrast of every part in every theme.
 
 Coming next:
-- **v3.15 — Writing patterns:** a check for repeated words, stock phrases and your own banned phrases, so writing sounds like you. Planned.
 - **v3.14 — Your apps at a glance:** a small indicator that shows which other Recon Towers apps are linked, and a
   toolbar you can tidy.
+- **v3.15 — Writing patterns:** a check for repeated words, stock phrases and your own banned phrases, so writing sounds like you. Planned.
 - **v4.0 — Writing studio:** book projects exported as EPUB, print-ready PDF and Word, Git built in,
   a folder published as a website, and an add-on gallery.
 - **Later, if needed:** shared review, a phone companion, writing together live.
