@@ -11,7 +11,7 @@ First version, 2026-11-27. It was made by searching every app's `ROADMAP.md` for
 | Feature | Home | Who else wants it | How it is shared today | Status |
 |---|---|---|---|---|
 | Themes and looks | The shared themes file (`neogentrics/recon-theme`) | Every app | One shared file | Decided; files move in after Reader 3.13.x |
-| Sending to WordPress, Ghost, Discord, wikis and Notion | RT Markdown Reader | Story Tracker, Audio Studio | They hand it the chapter or notes over App Link | Working as designed |
+| Sending to WordPress, Ghost, Discord, wikis and Notion | The shared code module (`recon-core`); Reader has it today | Story Tracker (v3.25), Audio Studio | Reader sends today; the code moves into the module so each app publishes on its own | Decided 2026-11-27; waits for the module |
 | Writing patterns (repeats, stock phrases, banned phrases) | One shared engine and one shared banned-phrase list | Reader, Story Tracker, Author Desk (blurbs, book descriptions in the Listing kit, promo copy), Audio Studio, and the blurb in Press | Planned, not built | Not scheduled |
 | Read aloud with natural voices | RT Markdown Reader (built, 3.2 to 3.12) | Story Tracker (v3.12: matches Reader's read aloud with Reader's offline voices); Audio Studio (v1.13 plans a voice edition with a different, local model); Recon Browser has its own read aloud | Story Tracker plans to reuse Reader's voices; whether that is shared code or a copy is not decided | **Overlap to settle** |
 | Dictation (Whisper) | RT Markdown Reader (built) | Story Tracker (v3.22, "Hear it and say it", reusing Reader's offline speech to text); Audio Studio's "hours of speech" builds on Reader's | Both plan to reuse Reader's Whisper; shared code or a copy is not decided | **Overlap to settle** |
@@ -55,6 +55,7 @@ These are the rows marked in bold. They are not mistakes yet; each one is a choi
 4. **The blurb: Press waits.** Press gets no temporary field. It waits until Author Desk's Listing kit exists, and then asks for the book's description over App Link. Author Desk must have the Listing kit by the time Press reaches the back-cover blurb, so the two roadmaps need matching version targets.
 5. **Recon Browser and Audio Studio are on hold.** Their rows in this table stay as they are until the owner starts building them.
 6. **The shared code module exists (2026-11-27).** The private repo `neogentrics/recon-core` was created, README only. Read aloud is the first piece: it moves out of Reader after Reader's look update merges, and Story Tracker 3.12 takes it in from there. Apps take the code in by a pinned-tag copy script with a lock file and a drift test, like the themes.
+7. **Publishing joins the shared module (2026-11-27).** Sending to blogs, wikis and Discord is not Reader-only: it moves into `recon-core` so Story Tracker (v3.25) and any other app can publish without Reader. Reported by the Story Tracker session as the owner's answer ("join"). Nothing is built until the module has its first piece, read aloud.
 
 Still to settle: which print PDF engine the shared package uses (Story Tracker's Chromium or Press's Typst), and who owns book layouts. Neither blocks anything today.
 
