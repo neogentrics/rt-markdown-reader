@@ -47,11 +47,20 @@ These are the rows marked in bold. They are not mistakes yet; each one is a choi
 3. **Pronunciation.** Reader's list and Story Tracker's dictionary should be one list, with Story Tracker as its home. That waits for Story Tracker's Dictionaries (v3.15, not built).
 4. **Formats and book layouts.** Reader and Story Tracker both convert many document formats, and book layouts are in Story Tracker with a plan to share them with Reader's v4.0 while Press also does print files. Who owns which is not settled.
 
+## Decisions (the owner, 2026-11-27)
+
+1. **Every app works on its own.** Someone may install only Press, or only Story Tracker, and not Reader. So an app never needs another app to do a job it advertises. Where a feature is shared, it is shared as **one code module** that each app that needs it takes in (the same way the shared themes will be), not by asking Reader. When apps are linked, hand-offs over App Link are a bonus, and Reader is a good reason to install more of the suite, but not a requirement.
+2. **So the shared code module is the answer** for read aloud, dictation, your own AI service, citations, document formats and the other overlaps in the table. It will live in a private repo like `neogentrics/recon-theme`. It is not created yet; nothing moves into it until the owner says go.
+3. **Exports are built into every app that uses them.** Someone with only Press, or only Story Tracker, gets the export features in that app. When all the apps are used together, **Press can export every file type**, because it is the app used just before uploading to a store or site.
+4. **The blurb: Press waits.** Press gets no temporary field. It waits until Author Desk's Listing kit exists, and then asks for the book's description over App Link. Author Desk must have the Listing kit by the time Press reaches the back-cover blurb, so the two roadmaps need matching version targets.
+5. **Recon Browser and Audio Studio are on hold.** Their rows in this table stay as they are until the owner starts building them.
+
+Still to settle: which print PDF engine the shared package uses (Story Tracker's Chromium or Press's Typst), and who owns book layouts. Neither blocks anything today.
+
 ## Next
 
-- Each app's session confirms its rows and adds any feature this survey missed.
-- The owner decides the three overlaps above. Until then nothing is built for any of them.
-- If the answer to the first overlap is "shared module", it goes in a private repo like `recon-theme`, taken in the same way (a script at a pinned tag, with a lock file and a test that fails on drift).
+- The three active sessions (Story Tracker, Author Desk, Press) update their own roadmaps and notes to match these decisions. Documentation only; nothing is built.
+- When the owner says go, the shared code module repo is created and the first pieces are chosen.
 
 ## What Press's EPUB adds (Press's own reading, may be stale)
 
