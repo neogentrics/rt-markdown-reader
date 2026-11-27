@@ -16,7 +16,7 @@ All of it is reached from one theme button on the main screen (Theme, Look, Type
 
 ## The themes
 
-Every app has the same ten, with the same names, plus *Auto*. Where the app is dark or light the name decides, not the app.
+Every app has the same ten, with the same names, plus *Auto*. Themes any app adds to the shared set (see Decisions) join them. Where the app is dark or light the name decides, not the app.
 
 | Name | `data-theme` | Note |
 |---|---|---|
@@ -73,7 +73,17 @@ Every theme meets AA, and every theme with every look is measured in the tests, 
 3. Add the colour tests (panel contrast per theme) and the look test (real text over each look, per theme).
 4. Say in the app's roadmap which pieces it left out and why.
 
-## Open decisions for the owner
+## Decisions (the owner, 2026-11-27, passed on by the app sessions)
 
-- **One shared package.** Instead of copying the files into each app, keep one small folder (tokens, themes, looks and the contrast tests) that every app pulls in, so a fix lands everywhere at once. Cheaper over time, more work now.
-- **One theme across apps.** When the person changes theme in one app, the others on the same computer could follow, through App Link. Not decided.
+The owner chose both of the earlier open questions, in his words: if the themes change, they change in all of the apps, and anytime a theme is added or uploaded, all apps can use it. So:
+
+1. **One shared themes file, not a copy per app.** Tokens, themes, looks and the contrast tests live in one place, and Reader is the reference. An app takes it in through a build step, and a check fails the build if the app's copy differs from the shared one. *Where it lives and how an app takes it in is not settled yet; see below.*
+2. **Themes added or uploaded are kept once.** A theme made in *Customize Theme*, or loaded from a file, is stored once in the shared per-user App Link folder, so every app offers it. A theme file is data only, is validated, and is refused if it fails contrast.
+3. **Following.** Changing theme, look or colour-safe in one app tells the linked apps on the same computer, and they switch too. Only linked apps are told, no document text travels, and *Preferences → Appearance* can turn it off. This needs a small addition to App Link (a message like `status`) and so a protocol decision. It is not built, and no app should start it before the owner says go.
+
+The shared set is the ten themes above plus themes that apps add to it. RT Author Desk's extras (Slate, Plum, Evergreen and Aero) are being added to the shared set, so every app can use them. Recon Browser's own extras are decided when it moves to the shared themes.
+
+## Still to settle
+
+- **Where the shared file lives.** Proposal: a small public repo, `neogentrics/recon-theme`, holding the tokens, the themes, the looks and the contrast tests, with a version tag. Each app takes it in at a pinned tag (a script that copies it in, or a git dependency) and has a test that fails when its copy differs. Until it exists, Reader's files are the source and new apps copy them. Needs the owner's yes before the repo is created.
+- **The App Link addition for following,** and where in the App Link folder the shared themes are stored. Decided together with the `kinds` change, which is already in RT Story Tracker 3.11.
