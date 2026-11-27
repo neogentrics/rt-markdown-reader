@@ -36,6 +36,8 @@ One thing has one home, and the others ask for it over App Link instead of keepi
 
 Story Tracker already has book layouts (trim sizes, mirrored margins, front and back matter) and a store-ready EPUB. Press starts from that work and goes further, instead of building it twice. Which app keeps which export is for the two apps' plans to settle, with the owner.
 
+Which app owns which *feature* is in [app-features.md](app-features.md).
+
 ## Parts to share, not rewrite
 
 | Part | Where it is now |
