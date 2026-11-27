@@ -239,7 +239,7 @@ Raised by the owner on 2026-11-27. **Not scheduled: no session starts on it unti
 - The app doesn't promise to get past AI detectors. Detectors are unreliable and change, so the claim would not hold. The check is for repeats, stock phrases and sounding like the person, which also lowers the tells.
 - Words stay on the computer. Nothing is sent anywhere unless the person turns on the AI pass.
 
-**Which apps.** RT Markdown Reader and RT Story Tracker first; RT Author Desk (blurbs and promo copy) and RT Audio Studio (scripts) next. RT Press and Recon Browser have no use for it.
+**Which apps.** RT Markdown Reader and RT Story Tracker first; RT Author Desk (blurbs and promo copy) and RT Audio Studio (scripts) next. RT Press needs a small version: the back-cover blurb it sets (v1.3) is the first thing a reader sees, and Press plans AI-drafted blurbs, so the check runs on the blurb text and on any draft before it is shown, using the shared engine and the shared banned-phrase list. Recon Browser has no use for it.
 
 **Where it fits in Reader.** After the look update and v3.14, as its own feature release (v3.15), not 4.0. Grammar checking in the style of Word's Editor (passive voice, grammar) is a separate gap; check what the app does today before promising it.
 
