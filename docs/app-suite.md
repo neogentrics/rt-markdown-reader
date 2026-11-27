@@ -193,3 +193,27 @@ Every app should feel like the same family. RT Markdown Reader is the reference,
 **Languages.** All the app's own words live in one table per feature, with Spanish, French and German and right-to-left layouts supported. Product names are marked so they aren't translated.
 
 **Wording.** Plain, short, and the same everywhere: *Open*, *Save*, *Restart to update*, *Check for Updates…*. If Reader already has a label for it, use that one.
+
+## What each app can do over App Link (kept in step)
+
+One table, so no app promises a button that the other end can't answer. The owner's main session keeps it. When an app gains or loses a capability, its session tells the main session in its report, and the table is updated the same day and sent to every app's session. Last checked against the code on 2026-11-27.
+
+| App | Version | Sends | Receives and does something with | Not yet |
+|---|---|---|---|---|
+| RT Markdown Reader | 3.13.0 | Documents, with their pictures, to RT Story Tracker (*Send to StoryTracker*, with or without a link) | Any document (`markdown`, `text`) with its pictures. It takes `kind` and ignores it | Research clips are not its job; it just opens them |
+| RT Story Tracker | 3.10.0 | Documents to RT Markdown Reader | Documents with a `kind`: `chapter`, `record`, `page`, `note` and `research`. A research clip goes into its Research book through the inbox | |
+| Recon Browser | 1.10.0 | Research clips (`open_document` with `kind: "research"`), built by `src/main/clip-builder.js` and sent by `src/main/app-link.js` | Documents (`markdown`, `text`) | Sends no other kind |
+| RT Author Desk | 1.2.0 | Nothing yet | Nothing yet | It finds installed apps (`src/main/installed.js`); no document exchange is built |
+| RT Press | 0.1.0 | Nothing yet | Nothing yet | Design only |
+| RT Audio Studio | 0.0.0 | Nothing yet | Nothing yet | Design only; building is paused |
+
+## Apps say what they do with each kind
+
+Today `hello` returns `accepts`, and in every app it reads `['markdown', 'text']`. That is the *format* of a document. It does not say which *kinds* an app does anything with, so Recon Browser can find RT Story Tracker and still not know whether a research clip will be handled.
+
+**The proposal (needs the owner's yes before any app is changed):**
+
+- `hello` also returns `kinds`: the values of `kind` the app does something useful with, for example `["chapter", "record", "page", "note", "research"]` for RT Story Tracker. An app that ignores `kind`, such as RT Markdown Reader, returns `[]`. A missing `kinds` means the app is older: treat it as `[]`.
+- A sender only offers a kind-specific action when the other app's `kinds` lists it. Otherwise the button is greyed out and says why ("RT Story Tracker 3.10 or later is needed", or "Not supported by this app yet"), instead of sending something that will be ignored.
+- It is an addition to protocol v1, so older apps keep working: they just don't announce anything. It goes in `app-link.md` when it is agreed.
+- Each app lists its own `kinds` in its README and keeps a test that `hello` and the table agree.
