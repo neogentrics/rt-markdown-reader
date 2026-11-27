@@ -54,6 +54,7 @@ These are the rows marked in bold. They are not mistakes yet; each one is a choi
 3. **Exports are built into every app that uses them.** Someone with only Press, or only Story Tracker, gets the export features in that app. When all the apps are used together, **Press can export every file type**, because it is the app used just before uploading to a store or site.
 4. **The blurb: Press waits.** Press gets no temporary field. It waits until Author Desk's Listing kit exists, and then asks for the book's description over App Link. Author Desk must have the Listing kit by the time Press reaches the back-cover blurb, so the two roadmaps need matching version targets.
 5. **Recon Browser and Audio Studio are on hold.** Their rows in this table stay as they are until the owner starts building them.
+6. **The shared code module exists (2026-11-27).** The private repo `neogentrics/recon-core` was created, README only. Read aloud is the first piece: it moves out of Reader after Reader's look update merges, and Story Tracker 3.12 takes it in from there. Apps take the code in by a pinned-tag copy script with a lock file and a drift test, like the themes.
 
 Still to settle: which print PDF engine the shared package uses (Story Tracker's Chromium or Press's Typst), and who owns book layouts. Neither blocks anything today.
 
