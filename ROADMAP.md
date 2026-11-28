@@ -374,6 +374,16 @@ Metallic is layered gradients, not blur: a light highlight along the top, a dark
 | 🙋 Your own banned phrases | M | A list kept per folder, counted across a whole folder or series, and shared with the other Recon Towers apps. It can be exported as a "never write these" block for an AI session. |
 | AI pass (optional) | S | For what rules can't see, with your own AI service or a local model. Off until you turn it on. |
 
+## Shared spelling (not scheduled)
+
+🙋 A shared spelling module for every app that edits text, raised by the owner on 2026-11-28. **Not started and not scheduled: it waits for the owner's word.** It would live in `recon-core` and each app would take it in as it does read aloud, so every app still works on its own. Today Reader has spell check in its editor, and what the other apps have differs (see `docs/app-features.md`).
+
+| Feature | Size | Details |
+|---|:-:|---|
+| 🙋 One dictionary of your own | M | The words you add are kept once, on your computer, and every Recon Towers app uses them, so a word is taught once. |
+| 🙋 Spell check in every app | M | The same checking wherever you write. |
+| 🙋 Several languages in one document | L | Dictionaries for more than one language, with the language worked out word by word, so French, Latin, Italian or German words in a story aren't marked as mistakes. |
+
 ## v4.0 — Writing studio
 
 From a folder of chapters to a finished book or website.
