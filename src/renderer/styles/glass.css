@@ -21,7 +21,7 @@
     --g-lo: oklch(from var(--g-ink) 1 0 0 / clamp(.02, calc(.187 - .222 * l), .14));          /* and where it has faded to */
     --g-pane-hi: oklch(from var(--g-ink) 1 0 0 / clamp(.09, calc(.85 - 1.01 * l), .55));    /* the same on a dialog, where there's more small grey text */
     --g-line: oklch(from var(--g-ink) 1 0 0 / clamp(.30, calc(1.217 - 1.222 * l), .85));      /* the bright line along the top edge */
-    --g-plate: oklch(from var(--g-ink) l c h / .07);                                          /* a button's own pane, tinted toward its text */
+    --g-plate: oklch(from var(--g-ink) l c h / clamp(.02, calc(.10 - .085 * l), .07));        /* a button's own pane, tinted toward its text: barely on a dark bar, where that only brightens what white words sit on */
     --g-drop: oklch(from var(--g-ink) .15 0 0 / clamp(.18, calc(-.033 + .711 * l), .50));     /* the shadow under a bar or a button */
     --g-deep: oklch(from var(--g-ink) .1 0 0 / clamp(.35, calc(.083 + .889 * l), .70));       /* the long shadow under a dialog */
     --g-field: oklch(from var(--g-ink) 1 0 0 / clamp(0, calc((.6 - l) * 4), .88));            /* a search box on a light surface is nearly white */

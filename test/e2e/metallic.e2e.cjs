@@ -37,11 +37,18 @@ const step = async (name, fn) => { await fn(); console.log('ok -', name); };
   // The computer's own voice, so read aloud has something to start with and stays open.
   await win.evaluate(() => { window.__nmrSpeech = { speak() {}, cancel() {}, getVoices: () => [] }; });
   const cdp = await win.context().newCDPSession(win);
-  await cdp.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-transparency', value: 'no-preference' }, { name: 'prefers-contrast', value: 'no-preference' }] });
+  // What the computer asks for. Always both: a list that leaves one out hands that one back to the real computer, and the
+  // Mac that builds this has Reduce Transparency on, which rightly turns Glass off.
+  const prefer = ({ transparency = 'no-preference', contrast = 'no-preference' } = {}) => cdp.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-transparency', value: transparency }, { name: 'prefers-contrast', value: contrast }] });
+  const forced = async (value) => { await win.emulateMedia({ forcedColors: value, reducedMotion: 'reduce' }); await prefer(); };
+  await prefer();
 
   const look = (theme, surface, extra = {}) => win.evaluate(async ([t, s, x]) => {
     await window.reader.setSettings({ theme: t, surface: s, ...x });
-  }, [theme, surface, extra]).then(() => win.waitForFunction(([t, s]) => document.documentElement.dataset.theme === t && document.documentElement.dataset.surface === s, [theme, surface]));
+  }, [theme, surface, extra]).then(() => win.waitForFunction(([t, s]) => document.documentElement.dataset.theme === t && document.documentElement.dataset.surface === s, [theme, surface]))
+    // And the finish really is on, so nothing below can pass by measuring the flat look.
+    .then(() => (surface === 'solid' || theme === 'contrast') || win.waitForFunction((v) => getComputedStyle(document.querySelector('.toolbar')).getPropertyValue(v).trim() !== '', surface === 'glass' ? '--g-sheen' : '--m-sheen-bar', { timeout: 5000 })
+      .catch(() => { throw new Error(`the ${surface} finish isn't applied in the ${theme} theme`); }));
 
   /**
    * Measure every control matching `groups` ({ name: selector }) that can be seen where the window is now. Returns the ones
@@ -263,12 +270,12 @@ const step = async (name, fn) => { await fn(); console.log('ok -', name); };
     await look('contrast', 'metallic');
     assert.deepEqual(await flat(), [], 'High Contrast is flat');
     await look('light', 'metallic');
-    await win.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
+    await forced('active');
     assert.deepEqual(await flat(), [], 'forced colours are flat');
-    await win.emulateMedia({ forcedColors: 'none', reducedMotion: 'reduce' });
-    await cdp.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-contrast', value: 'more' }] });
+    await forced('none');
+    await prefer({ contrast: 'more' });
     assert.deepEqual(await flat(), [], 'a request for more contrast is flat');
-    await cdp.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-contrast', value: 'no-preference' }] });
+    await prefer();
     assert.ok((await flat()).length > 0, 'and it comes back');
   });
 
@@ -286,14 +293,14 @@ const step = async (name, fn) => { await fn(); console.log('ok -', name); };
     await look('contrast', 'glass');
     assert.deepEqual(await flat(), [], 'High Contrast is flat');
     await look('light', 'glass');
-    await win.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
+    await forced('active');
     assert.deepEqual(await flat(), [], 'forced colours are flat');
-    await win.emulateMedia({ forcedColors: 'none', reducedMotion: 'reduce' });
-    await cdp.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-contrast', value: 'more' }] });
+    await forced('none');
+    await prefer({ contrast: 'more' });
     assert.deepEqual(await flat(), [], 'a request for more contrast is flat');
-    await cdp.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-transparency', value: 'reduce' }, { name: 'prefers-contrast', value: 'no-preference' }] });
+    await prefer({ transparency: 'reduce' });
     assert.deepEqual(await flat(), [], 'and so is a request for less transparency');
-    await cdp.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-transparency', value: 'no-preference' }, { name: 'prefers-contrast', value: 'no-preference' }] });
+    await prefer();
     assert.ok((await flat()).length > 0, 'and it comes back');
   });
 

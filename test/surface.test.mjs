@@ -53,7 +53,7 @@ test('the Glass stylesheet steps aside in the same cases, and for less transpare
   for (const flat of ['.markdown-body', '.editor', '.desk']) assert.ok(!css.includes(`${flat} {`) && !css.includes(`${flat},`), `${flat} is left alone`);
   const page = css.match(/^ {4}\.page \{[^}]*\}/m)[0];
   assert.ok(!/gradient|--g-/.test(page), 'the page is frosted, as before, with no sheen on it');
-  for (const name of ['--g-hi', '--g-lo', '--g-pane-hi', '--g-line', '--g-drop', '--g-deep', '--g-field', '--g-well']) {
+  for (const name of ['--g-hi', '--g-lo', '--g-pane-hi', '--g-line', '--g-drop', '--g-deep', '--g-field', '--g-well', '--g-plate']) {
     const line = css.split('\n').find((l) => l.trim().startsWith(`${name}:`));
     assert.match(line || '', /oklch\(from var\(--g-ink\) [^/]+\/ clamp\(/, `${name} comes from the text's lightness, within limits`);
   }
