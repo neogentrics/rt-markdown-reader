@@ -139,6 +139,23 @@ const DEFAULT = ['btn-save', 'btn-edit', 'btn-bookmark', 'btn-quick', 'btn-split
     }
   });
 
+  await step('on a screen 1024 wide, where the window opens about 820 wide, every button is still on the bar, in every look', async () => {
+    for (const surface of ['solid', 'metallic', 'glass']) {
+      await win.evaluate((s) => window.reader.setSettings({ surface: s, toolbar: {} }), surface);
+      await win.waitForFunction((s) => document.documentElement.dataset.surface === s, surface);
+      await width(819);
+      await settle();
+      assert.deepEqual(await seen(), DEFAULT.filter((id) => !['btn-save', 'btn-more'].includes(id)), `${surface}: nothing in “More”`);
+      assert.ok(await allInside());
+      assert.ok(await win.$eval('#doc-title', (t) => t.getBoundingClientRect().width >= 72), 'the title still shows');
+      assert.equal(await win.$eval('#btn-prefs', (b) => b.getBoundingClientRect().height), 34, 'as tall as ever');
+      await width(1280);
+    }
+    await win.evaluate(() => window.reader.setSettings({ surface: 'solid' }));
+    await settle();
+    assert.equal(await win.$eval('.tb-right', (r) => r.classList.contains('snug')), false, 'and with room, they’re their usual width');
+  });
+
   await step('in the narrowest window everything is still reachable', async () => {
     await menu('customize-toolbar');
     await win.click('#toolbar-reset');

@@ -6,7 +6,8 @@
 // (`hidden`: no document yet), your choice (`data-off`) and a lack of room (`data-overflow`).
 import { TOOLS, DEFAULT_TOOLBAR, orderOf, cleanToolbar } from '../main/toolbar-tools.js';
 
-const TITLE_ROOM = 150;        // the most the document's title is given before buttons move to "More"
+const TITLE_ROOM = 150;        // the most of the document's title that's kept whole with the buttons at their usual width
+const TITLE_LEAST = 80;        // and what it may be shortened to (with "…") before a button moves to "More"
 
 export function createToolbarUi({ api, settings, openPreferences }) {
   const $ = (id) => document.getElementById(id);
@@ -56,24 +57,31 @@ export function createToolbarUi({ api, settings, openPreferences }) {
 
   const onBar = (element) => !element.hidden && element.getClientRects().length > 0;
 
-  /** Does everything on the bar fit, with room left for the title? */
-  function fits() {
+  /** Does everything on the bar fit, with `room` left for the title (or all of it, if it's shorter)? */
+  function fits(room) {
     const words = title.querySelector('.tb-title-name');
-    const wanted = Math.min(TITLE_ROOM, (words?.scrollWidth || 0) + 24);
+    const wanted = Math.min(room, (words?.scrollWidth || 0) + 24);
     return right.getBoundingClientRect().right <= bar.getBoundingClientRect().right - 4 && title.getBoundingClientRect().width >= wanted - 1;
   }
 
-  /** Move buttons that don't fit into "More", from the end of your order. Edit and the apps button stay. */
+  /**
+   * When it's tight, the buttons first sit a little closer (as tall as ever) and the title shortens: the window on a
+   * screen 1024 wide opens about 820 wide, and everything stays on the bar there. Only then do buttons move into "More",
+   * from the end of your order. Edit and the apps button stay.
+   */
   function layout() {
     waiting = 0;
     for (const element of right.querySelectorAll('[data-overflow]')) element.removeAttribute('data-overflow');
+    right.classList.remove('snug');
     more.hidden = true;
     closeMore();
-    if (fits()) return;
+    if (fits(TITLE_ROOM)) return;
+    right.classList.add('snug');
+    if (fits(TITLE_LEAST)) return;
     more.hidden = false;
     const movable = orderOf(current.order).map((id) => elementOf(byId.get(id))).reverse();
     for (const element of movable) {
-      if (fits()) break;
+      if (fits(TITLE_LEAST)) break;
       if (!onBar(element) || element.hasAttribute('data-reveal')) continue;
       element.setAttribute('data-overflow', '');
     }

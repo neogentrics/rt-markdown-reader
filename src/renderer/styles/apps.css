@@ -30,6 +30,9 @@
 
 /* The toolbar you control (3.14). Off by your choice, or moved to "More" for room; the tutorial can show one again. */
 .tb-right > :is([data-off], [data-overflow]):not([data-reveal]) { display: none !important; }
+/* A tight window: the same buttons, as tall, a little closer together. */
+.tb-right.snug { gap: 1px; }
+.tb-right.snug .tb-btn:not(#btn-save, #btn-edit) { min-width: 28px; padding: 0 4px; }
 .tb-right.compact { gap: 1px; }
 .tb-right.compact .tb-btn { height: 28px; min-width: 28px; padding: 0 5px; gap: 4px; }
 .tb-right.compact .tb-btn svg { width: 16px; height: 16px; }
