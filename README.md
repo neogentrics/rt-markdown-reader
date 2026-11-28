@@ -893,13 +893,13 @@ src/
     ├── publish-ui.js     the PDF designer dialog and File → Export
     ├── export-model.js   the page as a simple document model (for Word and plain text)
     ├── present.js        presentation mode (slides split on ---)
-    ├── brand.js          custom accent colour and fonts as CSS
+    ├── shared/theme/     the themes, the Metallic and Glass looks and custom colours, shared with the other apps (don't edit here)
     ├── theme-ui.js       Customize Theme
     ├── lock-ui.js        the unlock screen and Protect with Password
     ├── run-ui.js         ▶ Run buttons and output panels
     ├── ai-ui.js          AI assist settings and the answer panel
     ├── index.html        layout + Content-Security-Policy
-    └── styles/           themes, document typography, code colors, print/PDF, export & presentation styles
+    └── styles/           Reader's own: layout, document typography, code colors, print/PDF, export & presentation styles
 ├── sandbox/              The code sandbox's page and worker (plus Pyodide, copied in at build time)
 └── locales/              es.json, fr.json, de.json, built from the tables in locales/source/*.tsv
 preview/                    File Explorer preview: a COM preview handler (C#, .NET Framework 4.8, Markdig) + tests;

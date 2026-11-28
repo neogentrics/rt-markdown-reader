@@ -1,0 +1,18 @@
+{
+  "source": "neogentrics/recon-theme",
+  "tag": "v0.1.0",
+  "commit": "d0f0bcfa221ba0bf5d5126bf2ee321b3c142a0fe",
+  "into": "src/renderer/shared",
+  "pieces": {
+    "theme": {
+      "dependencies": {},
+      "files": {
+        "brand.js": "59e56a4a513dc31c07420f34f20006c4daf7815d0ec4b34d256626c733dc2782",
+        "glass.css": "c7957ff970f993ded2b17d30c44a2ee576a34d1181f9b523ecf23d2c55430284",
+        "metallic.css": "95b688c044108897ecdbd8e8cfc607c49b3af720868db294963c057b20f6fa24",
+        "theme.css": "367d13b940a69c8366c33292d8b5ad71d6d53e63bf16d102f2c473b98f138a63"
+      }
+    }
+  },
+  "hash": "3fb25908e6e35b1d0223dd5633d51e6a2c8ee54aa13dc1c4ae5ca9ef87c641c2"
+}

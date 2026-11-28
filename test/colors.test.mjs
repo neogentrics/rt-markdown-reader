@@ -3,9 +3,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { ACCENTS, PANELS, THEME_PANELS, appCss, brandCss, panelAccent, panelTokens } from '../src/renderer/brand.js';
+import { ACCENTS, PANELS, THEME_PANELS, appCss, brandCss, panelAccent, panelTokens } from '../src/renderer/shared/theme/brand.js';
 
-const css = (name) => fs.readFileSync(new URL(`../src/renderer/styles/${name}.css`, import.meta.url), 'utf8');
+// The themes are the shared copy; the charts' and highlighters' colours are in Reader's own stylesheets.
+const css = (name) => fs.readFileSync(new URL(`../src/renderer/${name === 'theme' ? 'shared/theme' : 'styles'}/${name}.css`, import.meta.url), 'utf8');
 const KINDS = {
   protanopia: [[0.152286, 1.052583, -0.204868], [0.114503, 0.786281, 0.099216], [-0.003882, -0.048116, 1.051998]],
   deuteranopia: [[0.367322, 0.860646, -0.227968], [0.280085, 0.672501, 0.047413], [-0.01182, 0.04294, 0.968881]],

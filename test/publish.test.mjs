@@ -10,7 +10,7 @@ import { unzipSync, strFromU8 } from 'fflate';
 import { createRenderer } from '../src/renderer/markdown.js';
 import { buildModel, toPlainText } from '../src/renderer/export-model.js';
 import { splitSlides } from '../src/renderer/present.js';
-import { appCss, brandCss, hasBrand } from '../src/renderer/brand.js';
+import { appCss, brandCss, hasBrand } from '../src/renderer/shared/theme/brand.js';
 
 const require = createRequire(import.meta.url);
 const publish = require('../src/main/publish.js');

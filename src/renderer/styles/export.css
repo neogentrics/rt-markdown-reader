@@ -1,6 +1,6 @@
 /* Stylesheet for exported documents (PDF and web page): the document typography without the app UI. */
 @import 'katex/dist/katex.min.css';
-@import './theme.css';
+@import '../shared/theme/theme.css';
 @import './markdown.css';
 @import './blocks.css';
 @import './code.css';

@@ -1,5 +1,5 @@
 @import 'katex/dist/katex.min.css';
-@import './theme.css';
+@import '../shared/theme/theme.css';
 @import './ui.css';
 @import './tabs.css';
 @import './editor.css';
@@ -14,6 +14,6 @@
 @import './cards.css';
 @import './cite.css';
 @import './auto.css';
-@import './glass.css';
-@import './metallic.css';
+@import '../shared/theme/glass.css';
+@import '../shared/theme/metallic.css';
 @import './print.css';

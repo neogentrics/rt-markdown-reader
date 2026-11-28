@@ -1,5 +1,5 @@
 // View > Customize Theme: accent, panel and background colours, fonts and an optional brand stylesheet.
-import { ACCENTS, PANELS, BACKGROUNDS, FONT_CHOICES, appCss, brandCss } from './brand.js';
+import { ACCENTS, PANELS, BACKGROUNDS, FONT_CHOICES, appCss, brandCss } from './shared/theme/brand.js';
 
 const $ = (id) => document.getElementById(id);
 

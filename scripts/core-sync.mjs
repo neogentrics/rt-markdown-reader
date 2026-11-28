@@ -10,6 +10,8 @@
 // is read, written down or printed.
 //
 // Never edit a file under src/main/core/. Change it in recon-core, tag it there, and run this with the new tag.
+//
+// The same logic takes in the shared theme (recon-theme): scripts/theme-sync.mjs is this with other settings.
 import { execFileSync } from 'node:child_process';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
@@ -17,10 +19,15 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-export const REPOSITORY = 'neogentrics/recon-core';
-export const PIECES = ['read-aloud'];          // the folders of recon-core this app takes in
-export const INTO = 'src/main/core';           // inside src/main/, which is what the installer packages
-export const LOCK = 'core.lock';
+/** A shared repository this app takes from: which of its folders, where they land, and the lock that records them. */
+export const CORE = {
+  repository: 'neogentrics/recon-core',
+  pieces: ['read-aloud'],
+  into: 'src/main/core',          // inside src/main/, which is what the installer packages
+  lock: 'core.lock',
+  script: 'scripts/core-sync.mjs',
+};
+export const { into: INTO, lock: LOCK } = CORE;
 
 const sha256 = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex');
 
@@ -37,8 +44,9 @@ export function combinedHash(hashes) {
   return sha256(Object.keys(hashes).sort().map((name) => `${name} ${hashes[name]}\n`).join(''));
 }
 
-/** What's wrong with the shared code in the app at `root`, in words; an empty list when it is what core.lock says. */
-export function verify(root) {
+/** What's wrong with the shared files in the app at `root`, in words; an empty list when they are what the lock says. */
+export function verify(root, module = CORE) {
+  const { repository: REPOSITORY, pieces: PIECES, into: INTO, lock: LOCK } = module;
   let lock;
   try { lock = JSON.parse(fs.readFileSync(path.join(root, LOCK), 'utf8')); } catch (err) { return [`${LOCK} can’t be read: ${err.message}`]; }
   const problems = [];
@@ -81,7 +89,7 @@ function git(args) {
 }
 
 /** The tag's files, read from a fresh clone: { commit, pieces: { name: { dependencies, files: { name: bytes } } } }. */
-function fetchTag(tag, source) {
+function fetchTag(tag, source, { repository: REPOSITORY, pieces: PIECES }) {
   if (!/^v\d+\.\d+\.\d+$/.test(tag)) throw new Error(`“${tag}” isn’t a tag like v1.2.3. Shared code is only taken in at a tag.`);
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'core-sync-'));
   try {
@@ -111,7 +119,7 @@ function fetchTag(tag, source) {
   }
 }
 
-function lockFor(tag, { commit, pieces }) {
+function lockFor(tag, { commit, pieces }, { repository, into }) {
   const all = {};
   const out = {};
   for (const [piece, { dependencies, files }] of Object.entries(pieces)) {
@@ -119,20 +127,21 @@ function lockFor(tag, { commit, pieces }) {
     for (const [name, hash] of Object.entries(hashes)) all[`${piece}/${name}`] = hash;
     out[piece] = { dependencies, files: hashes };
   }
-  return { source: REPOSITORY, tag, commit, into: INTO, pieces: out, hash: combinedHash(all) };
+  return { source: repository, tag, commit, into, pieces: out, hash: combinedHash(all) };
 }
 
 /** Copy the tag into the app at `root` (or with `check`, only compare). Returns { lock, problems }. */
-export function sync({ root, tag, source = `https://github.com/${REPOSITORY}.git`, check = false }) {
-  const got = fetchTag(tag, source);
-  const lock = lockFor(tag, got);
+export function sync({ root, tag, source, check = false, module = CORE }) {
+  const { into: INTO, lock: LOCK } = module;
+  const got = fetchTag(tag, source || `https://github.com/${module.repository}.git`, module);
+  const lock = lockFor(tag, got, module);
   let before = null;
   try { before = JSON.parse(fs.readFileSync(path.join(root, LOCK), 'utf8')); } catch { /* the first time */ }
   if (before?.tag === tag && before.commit !== got.commit) {
     throw new Error(`The tag ${tag} has moved: ${LOCK} has commit ${before.commit}, and the tag now points to ${got.commit}. Make a new tag instead.`);
   }
   if (check) {
-    const problems = verify(root);
+    const problems = verify(root, module);
     if (JSON.stringify(before) !== JSON.stringify(lock)) problems.push(`${LOCK} isn’t what ${tag} gives`);
     return { lock, problems };
   }
@@ -143,28 +152,31 @@ export function sync({ root, tag, source = `https://github.com/${REPOSITORY}.git
     for (const [name, bytes] of Object.entries(files)) fs.writeFileSync(path.join(to, name), bytes);
   }
   fs.writeFileSync(path.join(root, LOCK), `${JSON.stringify(lock, null, 2)}\n`);
-  return { lock, problems: verify(root) };
+  return { lock, problems: verify(root, module) };
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+/** The command line, for whichever shared repository: `<script> <tag> [--check] [--source <url or folder>]`. */
+export function run(module) {
   const args = process.argv.slice(2);
   const at = args.indexOf('--source');
   const source = at === -1 ? undefined : args.splice(at, 2)[1];
   const check = args.includes('--check');
   const [tag] = args.filter((a) => a !== '--check');
   if (!tag) {
-    console.error('Usage: node scripts/core-sync.mjs <tag> [--check] [--source <url or folder>]');
+    console.error(`Usage: node ${module.script} <tag> [--check] [--source <url or folder>]`);
     process.exit(2);
   }
   try {
-    const { lock, problems } = sync({ root: path.join(path.dirname(fileURLToPath(import.meta.url)), '..'), tag, check, ...(source ? { source } : {}) });
+    const { lock, problems } = sync({ root: path.join(path.dirname(fileURLToPath(import.meta.url)), '..'), tag, check, source, module });
     if (problems.length) {
       console.error(problems.map((p) => `✖ ${p}`).join('\n'));
       process.exit(1);
     }
-    console.log(`${check ? 'Matches' : 'Took in'} ${REPOSITORY} ${lock.tag} (${lock.commit.slice(0, 7)}): ${Object.keys(lock.pieces).join(', ')}`);
+    console.log(`${check ? 'Matches' : 'Took in'} ${module.repository} ${lock.tag} (${lock.commit.slice(0, 7)}): ${Object.keys(lock.pieces).join(', ')}`);
   } catch (err) {
     console.error(`✖ ${hideLogins(err.message)}`);
     process.exit(1);
   }
 }
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) run(CORE);
