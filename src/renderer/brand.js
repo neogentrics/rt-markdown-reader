@@ -120,7 +120,8 @@ export function appCss(brand = {}) {
   }
   // Frosted panels take on what's behind them, which could leave their text unreadable over a colour you chose.
   if (HEX.test(brand.panel || '') || HEX.test(brand.background || '')) {
-    for (const part of ['toolbar', 'tabstrip', 'sidebar']) rules.push(`${NOT_CONTRAST}[data-surface="glass"] .${part} { background: var(--${part}-fill); backdrop-filter: none; border-color: var(--chrome-border); }`);
+    // They keep the sheen of glass.css (where it applies) over your colour.
+    for (const part of ['toolbar', 'tabstrip', 'sidebar']) rules.push(`${NOT_CONTRAST}[data-surface="glass"] .${part} { background: var(--g-sheen, none), var(--${part}-fill); backdrop-filter: none; border-color: var(--chrome-border); }`);
   }
   return rules.join('\n');
 }

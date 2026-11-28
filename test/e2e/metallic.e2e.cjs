@@ -1,4 +1,4 @@
-// End-to-end test for v3.13 "Metallic finish": the look can be chosen, it covers the toolbar, tabs, sidebar, dialogs and
+// End-to-end test for the Metallic and Glass looks (3.13 on): the look can be chosen, it covers the toolbar, tabs, sidebar, dialogs and
 // read-aloud bar, it stays flat for High Contrast, forced colours and a request for more contrast, and the text on it
 // is still readable in every theme.
 //
@@ -37,11 +37,18 @@ const step = async (name, fn) => { await fn(); console.log('ok -', name); };
   // The computer's own voice, so read aloud has something to start with and stays open.
   await win.evaluate(() => { window.__nmrSpeech = { speak() {}, cancel() {}, getVoices: () => [] }; });
   const cdp = await win.context().newCDPSession(win);
-  await cdp.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-transparency', value: 'no-preference' }, { name: 'prefers-contrast', value: 'no-preference' }] });
+  // What the computer asks for. Always both: a list that leaves one out hands that one back to the real computer, and the
+  // Mac that builds this has Reduce Transparency on, which rightly turns Glass off.
+  const prefer = ({ transparency = 'no-preference', contrast = 'no-preference' } = {}) => cdp.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-transparency', value: transparency }, { name: 'prefers-contrast', value: contrast }] });
+  const forced = async (value) => { await win.emulateMedia({ forcedColors: value, reducedMotion: 'reduce' }); await prefer(); };
+  await prefer();
 
   const look = (theme, surface, extra = {}) => win.evaluate(async ([t, s, x]) => {
     await window.reader.setSettings({ theme: t, surface: s, ...x });
-  }, [theme, surface, extra]).then(() => win.waitForFunction(([t, s]) => document.documentElement.dataset.theme === t && document.documentElement.dataset.surface === s, [theme, surface]));
+  }, [theme, surface, extra]).then(() => win.waitForFunction(([t, s]) => document.documentElement.dataset.theme === t && document.documentElement.dataset.surface === s, [theme, surface]))
+    // And the finish really is on, so nothing below can pass by measuring the flat look.
+    .then(() => (surface === 'solid' || theme === 'contrast') || win.waitForFunction((v) => getComputedStyle(document.querySelector('.toolbar')).getPropertyValue(v).trim() !== '', surface === 'glass' ? '--g-sheen' : '--m-sheen-bar', { timeout: 5000 })
+      .catch(() => { throw new Error(`the ${surface} finish isn't applied in the ${theme} theme`); }));
 
   /**
    * Measure every control matching `groups` ({ name: selector }) that can be seen where the window is now. Returns the ones
@@ -209,7 +216,7 @@ const step = async (name, fn) => { await fn(); console.log('ok -', name); };
     bad.push(...await readableScrolling(PREFS, '#prefs-dlg'));
     await win.click('#prefs-done');
     await win.waitForSelector('#prefs-dlg', { state: 'hidden' });
-    assert.deepEqual(bad, [], `text that can't be read well on the Metallic look, ${where}:\n  ${bad.join('\n  ')}`);
+    assert.deepEqual(bad, [], `text that can't be read well on this look, ${where}:\n  ${bad.join('\n  ')}`);
   }
 
   await step('Metallic is a choice beside Solid and Glass, on the theme button, in Preferences and in the View menu', async () => {
@@ -263,12 +270,37 @@ const step = async (name, fn) => { await fn(); console.log('ok -', name); };
     await look('contrast', 'metallic');
     assert.deepEqual(await flat(), [], 'High Contrast is flat');
     await look('light', 'metallic');
-    await win.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
+    await forced('active');
     assert.deepEqual(await flat(), [], 'forced colours are flat');
-    await win.emulateMedia({ forcedColors: 'none', reducedMotion: 'reduce' });
-    await cdp.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-contrast', value: 'more' }] });
+    await forced('none');
+    await prefer({ contrast: 'more' });
     assert.deepEqual(await flat(), [], 'a request for more contrast is flat');
-    await cdp.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-contrast', value: 'no-preference' }] });
+    await prefer();
+    assert.ok((await flat()).length > 0, 'and it comes back');
+  });
+
+  await step('Glass has its own finish, and stays flat for the same three', async () => {
+    const sheen = (selector) => win.evaluate((q) => getComputedStyle(document.querySelector(q)).getPropertyValue('--g-sheen').trim(), selector);
+    const parts = ['.toolbar', '.tabstrip', '.sidebar', '#btn-theme', '.tab.active'];
+    const flat = () => win.evaluate((list) => list.filter((q) => getComputedStyle(document.querySelector(q)).getPropertyValue('--g-sheen').trim() !== ''), parts);
+    await look('light', 'glass');
+    for (const selector of [...parts, '#theme-menu', '#find-bar']) assert.ok(await sheen(selector), `${selector} has the Glass sheen`);
+    for (const selector of ['.toolbar', '#btn-theme', '.tab.active', '#theme-menu']) {
+      const now = await win.$eval(selector, (e) => { const cs = getComputedStyle(e); return { image: cs.backgroundImage, shadow: cs.boxShadow }; });
+      assert.ok(now.image.includes('linear-gradient') && now.shadow !== 'none', `${selector} is a lit pane with edges`);
+    }
+    assert.equal(await win.evaluate(() => getComputedStyle(document.querySelector('.page:not([hidden])')).backgroundImage), 'none', 'the page has no sheen');
+    await look('contrast', 'glass');
+    assert.deepEqual(await flat(), [], 'High Contrast is flat');
+    await look('light', 'glass');
+    await forced('active');
+    assert.deepEqual(await flat(), [], 'forced colours are flat');
+    await forced('none');
+    await prefer({ contrast: 'more' });
+    assert.deepEqual(await flat(), [], 'a request for more contrast is flat');
+    await prefer({ transparency: 'reduce' });
+    assert.deepEqual(await flat(), [], 'and so is a request for less transparency');
+    await prefer();
     assert.ok((await flat()).length > 0, 'and it comes back');
   });
 
@@ -293,10 +325,19 @@ const step = async (name, fn) => { await fn(); console.log('ok -', name); };
     });
   }
 
-  await step('colours you choose in Customize Theme are readable on it too', async () => {
-    for (const [name, brand] of [['a deep panel', { accent: '#c2255c', panel: '#1b1b3a', background: '#0d0d1f' }], ['a pale panel', { accent: '#2f54c9', panel: '#f6ecc4', background: '#e9d9a0' }]]) {
-      await look('light', 'metallic', { brand });
-      await measureEverything(`with ${name}`);
+  for (const theme of THEMES) {
+    await step(`${theme}: every part of the Glass finish can be read`, async () => {
+      await look(theme, 'glass');
+      await measureEverything(`in the ${theme} theme, with Glass`);
+    });
+  }
+
+  await step('colours you choose in Customize Theme are readable on both finishes', async () => {
+    for (const surface of ['metallic', 'glass']) {
+      for (const [name, brand] of [['a deep panel', { accent: '#c2255c', panel: '#1b1b3a', background: '#0d0d1f' }], ['a pale panel', { accent: '#2f54c9', panel: '#f6ecc4', background: '#e9d9a0' }]]) {
+        await look('light', surface, { brand });
+        await measureEverything(`with ${name}, ${surface}`);
+      }
     }
     await look('light', 'metallic', { brand: { accent: '', panel: '', background: '' } });
   });

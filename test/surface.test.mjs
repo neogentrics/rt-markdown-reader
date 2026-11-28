@@ -32,7 +32,8 @@ test('the Metallic stylesheet steps aside for High Contrast, forced colours and 
   for (const flat of ['.page', '.markdown-body', '.editor', 'textarea.editor', '.desk']) assert.ok(!css.includes(`${flat} {`) && !css.includes(`${flat},`), `${flat} stays flat`);
   // Every layer is worked out from the lightness of the text on the surface, so one rule serves light and dark themes alike
   // (and Sepia, Blue and Red, whose toolbar is dark under a light page), and nothing is a fixed white or black.
-  const layers = ['--m-top', '--m-top-2', '--m-band', '--m-low', '--m-edge', '--m-line-hi', '--m-line-lo', '--m-drop', '--m-well', '--m-lip'];
+  const layers = ['--m-top', '--m-top-2', '--m-band', '--m-low', '--m-btn-hi', '--m-btn-lo', '--m-brush-1', '--m-brush-2', '--m-brush-3', '--m-brush-4', '--m-brush-5',
+    '--m-line-hi', '--m-line-lo', '--m-drop', '--m-deep', '--m-field-hi', '--m-field-lo', '--m-field-shade', '--m-well', '--m-lip'];
   for (const name of layers) {
     const line = css.split('\n').find((l) => l.trim().startsWith(`${name}:`));
     assert.ok(line, `${name} is declared`);
@@ -40,4 +41,21 @@ test('the Metallic stylesheet steps aside for High Contrast, forced colours and 
   }
   assert.match(css, /--m-ink: var\(--text-soft\)/, 'the toolbar and sidebar go by their own text');
   assert.match(css, /--m-ink: var\(--text\)/, 'dialogs and text boxes go by the page’s');
+});
+
+test('the Glass stylesheet steps aside in the same cases, and for less transparency, and puts no sheen on the page or the editor', () => {
+  const css = fs.readFileSync(new URL('../src/renderer/styles/glass.css', import.meta.url), 'utf8');
+  assert.match(css, /@media screen and \(prefers-reduced-transparency: no-preference\) and \(forced-colors: none\) and \(prefers-contrast: no-preference\)/);
+  assert.ok(!/!important/.test(css));
+  const selectors = [...css.matchAll(/^\s*(:root\[data-surface="glass"\][^{]*)\{/gm)].map((m) => m[1]);
+  assert.ok(selectors.length >= 4);
+  assert.ok(selectors.every((s) => s.includes(':not([data-theme="contrast"])')), 'every :root rule leaves out High Contrast');
+  for (const flat of ['.markdown-body', '.editor', '.desk']) assert.ok(!css.includes(`${flat} {`) && !css.includes(`${flat},`), `${flat} is left alone`);
+  const page = css.match(/^ {4}\.page \{[^}]*\}/m)[0];
+  assert.ok(!/gradient|--g-/.test(page), 'the page is frosted, as before, with no sheen on it');
+  for (const name of ['--g-hi', '--g-lo', '--g-pane-hi', '--g-line', '--g-drop', '--g-deep', '--g-field', '--g-well', '--g-plate']) {
+    const line = css.split('\n').find((l) => l.trim().startsWith(`${name}:`));
+    assert.match(line || '', /oklch\(from var\(--g-ink\) [^/]+\/ clamp\(/, `${name} comes from the text's lightness, within limits`);
+  }
+  assert.match(fs.readFileSync(new URL('../src/renderer/styles/app.css', import.meta.url), 'utf8'), /@import '\.\/glass\.css';/);
 });

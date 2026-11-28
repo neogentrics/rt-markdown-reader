@@ -642,17 +642,18 @@ Double-click it to put it back.
 
 *New in 3.5:* **Blue**, **Red** and **Yellow** have panels that run from one colour to another, contrasting buttons and a
 clean page to read on. The **Glass** look (the theme button, or *Preferences → Appearance*) works with any theme, turning
-its panels and page to frosted glass over its own colours. It's left out of High Contrast, printing and exports, and
-it steps aside if your computer is set for less transparency.
+its panels and page to frosted glass over its own colours, with every toolbar button a small lit pane and a soft glow
+around the search boxes. It's left out of High Contrast, printing and exports, and it steps aside for forced colours or
+if your computer is set for less transparency or more contrast.
 
 <img src="docs/screenshots/glass.png" width="860" alt="The Paper theme with the Glass look: frosted panels and page over soft blue and green">
 
 <img src="docs/screenshots/metallic.png" width="860" alt="The Paper theme with the Metallic look: a brushed-metal toolbar and tab, raised buttons, and a recessed filter box">
 
 *New in 3.13:* the **Metallic** look, beside Solid and Glass (the theme button, *Preferences → Appearance* or *View → Look*), gives the toolbar, tabs,
-sidebar, dialogs and read-aloud bar a brushed-metal finish: raised buttons, a glossy main button and recessed text boxes. It works on top of
+sidebar, dialogs and read-aloud bar a brushed-metal finish: bevelled buttons, brushed dialogs, a glossy main button and recessed text boxes. It works on top of
 any theme, and with your own colours from *Customize Theme*. The page and the editor stay flat, and so do printing, exports, High Contrast,
-forced colours and a computer set for more contrast. A test measures the contrast of every part of it in every theme.
+forced colours and a computer set for more contrast. A test measures the contrast of every part of Metallic and Glass in every theme.
 
 **Colour-safe colours** (*Preferences → Appearance*) work with any theme, for protanopia, deuteranopia and tritanopia.
 Compare shows changes in blue and orange instead of green and red, with underlines and strikethroughs so they don't

@@ -201,6 +201,6 @@ test('custom theme: panel and background colours are checked, and stay out of ex
   assert.match(appCss({ panel: '#efe6d4' }), /color-scheme: light/);
   assert.match(appCss({ background: '#efe6d4' }), /--desk: #efe6d4/);
   assert.match(appCss({ background: '#efe6d4' }), /:not\(\[data-theme="contrast"\]\)/, 'High Contrast keeps its own');
-  for (const brand of [{ panel: '#12355b' }, { background: '#efe6d4' }]) assert.match(appCss(brand), /\[data-surface="glass"\] \.toolbar \{ background: var\(--toolbar-fill\)/, 'panels stay solid over your colours');
+  for (const brand of [{ panel: '#12355b' }, { background: '#efe6d4' }]) assert.match(appCss(brand), /\[data-surface="glass"\] \.toolbar \{ background: var\(--g-sheen, none\), var\(--toolbar-fill\); backdrop-filter: none/, 'panels stay solid over your colours');
   assert.doesNotMatch(appCss({ accent: '#2b8a3e' }), /data-surface/);
 });

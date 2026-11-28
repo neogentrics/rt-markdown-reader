@@ -236,13 +236,13 @@ const step = async (name, fn) => { await fn(); console.log('ok -', name); };
     const cdp = await win.context().newCDPSession(win);
     const transparency = (value) => cdp.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-transparency', value }] });
     await transparency('reduce');
-    assert.doesNotMatch((await look()).toolbar, /blur\(22px\)/, 'Glass steps aside when the computer asks for less transparency');
+    assert.doesNotMatch((await look()).toolbar, /blur\(28px\)/, 'Glass steps aside when the computer asks for less transparency');
     await transparency('no-preference');
     for (const theme of ['light', 'dark', 'red']) {
       await win.evaluate((t) => window.reader.setSettings({ theme: t }), theme);
       await win.waitForFunction((t) => document.documentElement.dataset.theme === t, theme);
       const now = await look();
-      assert.match(now.toolbar, /blur\(22px\)/, theme);
+      assert.match(now.toolbar, /blur\(28px\)/, theme);
       assert.match(now.page, /color\(srgb .* \/ 0\.86\)|rgba\(.*0\.86\)/, `${theme}: ${now.page}`);
     }
     await win.evaluate(() => window.reader.setSettings({ theme: 'contrast' }));
