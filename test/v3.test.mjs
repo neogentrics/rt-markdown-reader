@@ -184,7 +184,7 @@ test('every file the main process loads from outside src/main is packaged into t
   const globs = files.map((g) => new RegExp(`^${g.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*\*/g, '\u0000').replace(/\*/g, '[^/]*').replace(/\u0000/g, '.*')}$`));
   const mainDir = join(root, 'src', 'main');
   const outside = [];
-  for (const f of readdirSync(mainDir).filter((x) => x.endsWith('.js'))) {
+  for (const f of readdirSync(mainDir, { recursive: true }).filter((x) => x.endsWith('.js'))) {
     for (const m of readFileSync(join(mainDir, f), 'utf8').matchAll(/require\((['"])(\.\.?\/[^'"]+)\1\)/g)) {
       const rel = relative(root, resolve(dirname(join(mainDir, f)), m[2])).split('\\').join('/');
       if (!rel.startsWith('src/main/')) outside.push(rel);

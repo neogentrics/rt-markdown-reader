@@ -8,8 +8,8 @@ import { splitSlides, paginate } from '../src/renderer/present.js';
 import { sectionFrom, paragraphFrom, openingOf } from '../src/renderer/read-ui.js';
 
 const require = createRequire(import.meta.url);
-const { voiceLabel, VOICE_NAMES } = require('../src/main/voice-text.js');
-const { Supertonic } = require('../src/main/supertonic.js');
+const { voiceLabel, VOICE_NAMES } = require('../src/main/core/read-aloud/voice-text.js');
+const { Supertonic } = require('../src/main/core/read-aloud/supertonic.js');
 
 const win = new JSDOM('').window;
 const render = createRenderer(win);

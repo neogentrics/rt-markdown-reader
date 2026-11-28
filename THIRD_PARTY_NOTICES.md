@@ -38,7 +38,7 @@ application (`resources/app.asar/dist/app.js.LEGAL.txt` and the Electron `LICENS
 | mammoth (with `jszip`, `bluebird`, `lop`, `option`, `dingbat-to-unicode`, `underscore`, `xmlbuilder`, `@xmldom/xmldom`, `base64-js`) | 1.13.0 | BSD-2-Clause (jszip: MIT, chosen from MIT OR GPL-3.0-or-later; the others MIT or BSD-2-Clause) | https://github.com/mwilliamson/mammoth.js |
 | Markdig (File Explorer preview, with System.Memory, System.Buffers and related .NET packages) | 1.5.1 | BSD-2-Clause (.NET packages: MIT) | https://github.com/xoofx/markdig |
 | ONNX Runtime Web (natural voices, with `onnxruntime-common`, `flatbuffers`, `guid-typescript`, `long`, `protobufjs`) | 1.31.1 | MIT (flatbuffers, long: Apache-2.0; protobufjs: BSD-3-Clause; guid-typescript: ISC) | https://onnxruntime.ai |
-| Supertonic sample code (text preparation and inference, adapted in `src/main/voice-text.js` and `src/main/supertonic.js`) | revision `aafc6e3` | MIT, © Supertone Inc. | https://github.com/supertone-inc/supertonic |
+| Supertonic sample code (text preparation and inference, adapted in `src/main/core/read-aloud/voice-text.js` and `src/main/core/read-aloud/supertonic.js`) | revision `aafc6e3` | MIT, © Supertone Inc. | https://github.com/supertone-inc/supertonic |
 
 Pyodide is shipped unmodified in `resources/app.asar/dist/sandbox/pyodide/`; its source is available
 from the Pyodide project under the Mozilla Public License 2.0.

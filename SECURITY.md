@@ -213,7 +213,7 @@ Markdown files are treated as **untrusted input**:
 - **Nothing is downloaded until the reader agrees** in a native dialog that gives the size and the license.
   The files come from one fixed revision of Supertone's published model on Hugging Face (the revision is
   part of every URL), through Electron's network stack (the system's proxy and certificate store).
-- **Every file is checked before use:** its size and SHA-256 are written into the app (`src/main/voices.js`).
+- **Every file is checked before use:** its size and SHA-256 are written into the app (`src/main/core/read-aloud/voices.js`).
   Bytes are hashed as they arrive; a file larger than expected is stopped at once, and a file that doesn't
   match is deleted. Files are downloaded under a temporary name and only renamed into place once they
   match, and the voices count as installed only when every file is in place.

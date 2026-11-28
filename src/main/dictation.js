@@ -2,7 +2,7 @@
 // Dictation (3.5): getting the speech model onto this computer, and talking to the process that listens.
 // It works just like the natural voices (voices.js): nothing is downloaded until the reader agrees, every file
 // is checked against its size and SHA-256, and the sound never leaves the computer.
-const { VoiceStore } = require('./voices');
+const { VoiceStore } = require('./core/read-aloud/voices');
 
 const MODEL = 'whisper-base';
 const REVISION = '27a07b4b52b3a4c5886134bb4320e93e1a4bbc7c';

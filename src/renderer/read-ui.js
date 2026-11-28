@@ -1,8 +1,8 @@
 // Read, listen (2.4): read aloud with the computer's own voices, focus mode, folding sections under their
 // headings, and hover previews of footnotes and of links to other documents.
-// Natural voices (3.2): read aloud with the Supertonic voices, made on this computer (src/main/voices.js).
-import { modelLang, guessLang, applyPronunciation, voiceLabel, breathAt, withBreath } from '../main/voice-text.js';
-import { cleanReading, stepGovernor, QUALITY, QUICK_STEPS } from '../main/voice-tone.js';
+// Natural voices (3.2): read aloud with the Supertonic voices, made on this computer (src/main/core/read-aloud/voices.js).
+import { modelLang, guessLang, applyPronunciation, voiceLabel, breathAt, withBreath } from '../main/core/read-aloud/voice-text.js';
+import { cleanReading, stepGovernor, QUALITY, QUICK_STEPS } from '../main/core/read-aloud/voice-tone.js';
 
 const $ = (id) => document.getElementById(id);
 const NATURAL = 'natural:';

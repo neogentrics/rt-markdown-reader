@@ -3,8 +3,8 @@
 // to disk a sentence at a time, and the finished file only appears at the end.
 import { collectSentences } from './read-ui.js';
 import { m4bStart, m4bEnd, id3 } from './m4b.js';
-import { modelLang, guessLang, applyPronunciation, voiceLabel, breathAt, withBreath } from '../main/voice-text.js';
-import { cleanReading, QUALITY } from '../main/voice-tone.js';
+import { modelLang, guessLang, applyPronunciation, voiceLabel, breathAt, withBreath } from '../main/core/read-aloud/voice-text.js';
+import { cleanReading, QUALITY } from '../main/core/read-aloud/voice-tone.js';
 
 const $ = (id) => document.getElementById(id);
 const NATURAL = 'natural:';

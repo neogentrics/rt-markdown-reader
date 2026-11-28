@@ -43,8 +43,8 @@ const discord = require('./discord');
 const sent = require('./sent');
 const { Inbound, newKey: newInboundKey, networkAddresses } = require('./inbound');
 const { SyncEngine } = require('./sync');
-const { VoiceStore, VOICES, LICENSE_URL } = require('./voices');
-const { LANGS: VOICE_LANGS } = require('./voice-text');
+const { VoiceStore, VOICES, LICENSE_URL } = require('./core/read-aloud/voices');
+const { LANGS: VOICE_LANGS } = require('./core/read-aloud/voice-text');
 const publish = require('./publish');
 
 const isMac = process.platform === 'darwin';
