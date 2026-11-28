@@ -6,12 +6,14 @@ const { cleanServers } = require('./servers');
 const fs = require('node:fs');
 const { cleanAiSettings } = require('./ai-providers');
 const { DEFAULT_READING, cleanReading } = require('./core/read-aloud/voice-tone');
+const { DEFAULT_TOOLBAR, cleanToolbar } = require('./toolbar-tools');
 const path = require('node:path');
 
 const DEFAULTS = Object.freeze({
   theme: 'system',        // system | light | dark | sepia | mist | forest | dusk | contrast | blue | red | yellow
   font: 'sans',           // one of FONTS
   surface: 'solid',       // solid | metallic | glass
+  toolbar: DEFAULT_TOOLBAR,   // the buttons on the right: their order, the hidden ones, small, names beside icons (3.14)
   colorSafe: false,       // colours that stay apart with colour blindness
   fontScale: 1,           // 0.7 – 1.8
   pageWidth: 'normal',    // narrow | normal | wide | full
@@ -165,6 +167,7 @@ function sanitize(input) {
   if (THEMES.includes(input.theme) || /^addon:[a-z0-9][a-z0-9-]{1,39}:[a-z0-9][a-z0-9-]{1,39}$/.test(input.theme || '')) s.theme = input.theme;
   if (FONTS.includes(input.font)) s.font = input.font;
   if (['solid', 'metallic', 'glass'].includes(input.surface)) s.surface = input.surface;
+  s.toolbar = cleanToolbar(input.toolbar);
   if (WIDTHS.includes(input.pageWidth)) s.pageWidth = input.pageWidth;
   for (const k of ['showToc', 'showMenuBar', 'restoreSession', 'claudeConnector', 'appLink', 'colorSafe']) if (typeof input[k] === 'boolean') s[k] = input[k];
   const scale = Number(input.fontScale);

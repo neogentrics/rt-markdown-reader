@@ -27,7 +27,7 @@ const STEPS = [
   { title: 'That’s the tour', text: 'Press F1 at any time for the Help Center, with guides, common questions and this tutorial. Enjoy your reading.' },
 ];
 
-export function createTourUi({ api, activeTab, openGuide }) {
+export function createTourUi({ api, activeTab, openGuide, reveal = () => {} }) {
   const card = $('tour-card');
   const ring = $('tour-ring');
   const welcome = $('tour-welcome');
@@ -63,6 +63,7 @@ export function createTourUi({ api, activeTab, openGuide }) {
     $('tour-guide').hidden = !step.guide;
     $('tour-next').textContent = i === STEPS.length - 1 ? 'Finish' : 'Next';
     card.hidden = false;
+    reveal(step.target || null);          // a button you've hidden, or one with no room, shows while its step is on
     placeRing();
     api.tutorialSet({ state: 'todo', step: i });
   }
@@ -74,6 +75,7 @@ export function createTourUi({ api, activeTab, openGuide }) {
     card.hidden = true;
     ring.hidden = true;
     index = -1;
+    reveal(null);
   }
 
   const next = () => { if (index >= STEPS.length - 1) finish(); else show(index + 1); };

@@ -333,6 +333,27 @@ const step = async (name, fn) => { await fn(); console.log('ok -', name); };
     });
   }
 
+  await step('names beside the toolbar icons can be read on both finishes, in every theme', async () => {
+    for (const theme of THEMES) {
+      for (const surface of ['metallic', 'glass']) {
+        await look(theme, surface, { toolbar: { labels: true } });
+        await win.waitForSelector('#btn-quick .tb-name');
+        const bad = await readable({ 'toolbar buttons': '.toolbar .tb-btn' });
+        assert.deepEqual(bad, [], `names on the toolbar, ${theme} with ${surface}:\n  ${bad.join('\n  ')}`);
+      }
+    }
+    // And with colours of your own.
+    for (const surface of ['metallic', 'glass']) {
+      for (const [name, brand] of [['a deep panel', { accent: '#c2255c', panel: '#1b1b3a', background: '#0d0d1f' }], ['a pale panel', { accent: '#2f54c9', panel: '#f6ecc4', background: '#e9d9a0' }]]) {
+        await look('light', surface, { toolbar: { labels: true }, brand });
+        await win.waitForSelector('#btn-quick .tb-name');
+        const bad = await readable({ 'toolbar buttons': '.toolbar .tb-btn' });
+        assert.deepEqual(bad, [], `names on the toolbar with ${name}, ${surface}:\n  ${bad.join('\n  ')}`);
+      }
+    }
+    await look('light', 'metallic', { toolbar: { labels: false }, brand: { accent: '', panel: '', background: '' } });
+  });
+
   await step('colours you choose in Customize Theme are readable on both finishes', async () => {
     for (const surface of ['metallic', 'glass']) {
       for (const [name, brand] of [['a deep panel', { accent: '#c2255c', panel: '#1b1b3a', background: '#0d0d1f' }], ['a pale panel', { accent: '#2f54c9', panel: '#f6ecc4', background: '#e9d9a0' }]]) {

@@ -35,6 +35,7 @@ import { createDictateUi } from './dictate-ui.js';
 import { createTourUi } from './tour-ui.js';
 import { createPrefsUi } from './prefs-ui.js';
 import { createAppsUi } from './apps-ui.js';
+import { createToolbarUi } from './toolbar-ui.js';
 import { createHelpUi } from './help-ui.js';
 import { resolveWiki, relative, dirOf, slugify as wikiSlug } from '../main/notes-core.js';
 import './styles/app.css';
@@ -93,6 +94,7 @@ let dictateUi = null;
 let tourUi = null;
 let prefsUi = null;
 let appsUi = null;
+let toolbarUi = null;
 let helpUi = null;
 const uiText = createUiTranslator();
 
@@ -373,6 +375,7 @@ async function toggleBookmark() {
 function updateChrome() {
   const has = tabs.length > 0;
   document.body.classList.toggle('has-doc', has);
+  $('btn-read').hidden = !has;
   els.welcome.hidden = has;
   editMode?.refresh();
   if (!has) {
@@ -1005,6 +1008,7 @@ api.onCommand(({ cmd, arg }) => {
     case 'help-center': helpUi.open(); break;
     case 'preferences': prefsUi.open(arg); break;
     case 'apps': appsUi.open(); break;
+    case 'customize-toolbar': toolbarUi.customize(); break;
     case 'connect-claude': connectorUi.open(); break;
     case 'open-claude-code': connectorUi.openClaudeCode(); break;
     case 'addon-export': if (arg) addonsUi.exportWith(arg); break;
@@ -1175,6 +1179,7 @@ function applySettings(s) {
   if (activeTab()) updateBookmarkButton();
   if (prevTheme && prevTheme !== root.dataset.theme && (prevTone !== root.dataset.tone)) for (const t of tabs) renderMermaid(t.el, true);
   themeUi?.apply(s.brand || {});
+  toolbarUi?.apply(s.toolbar);
 }
 
 function showUpdate(status) {
@@ -1399,7 +1404,8 @@ addonsUi = createAddonsUi({
 });
 aboutUi = createAboutUi({ api, toast });
 connectorUi = createConnectorUi({ api, toast, isDirty: (p) => tabs.some((t) => t.dirty && t.doc.path && samePath(t.doc.path, p)) });
-tourUi = createTourUi({ api, activeTab, openGuide: () => helpUi.open('ai') });
+toolbarUi = createToolbarUi({ api, settings: () => settings, openPreferences: (pane) => prefsUi.open(pane) });
+tourUi = createTourUi({ api, activeTab, openGuide: () => helpUi.open('ai'), reveal: (target) => toolbarUi.reveal(target) });
 syncUi = createSyncUi({
   api, toast,
   settings: () => settings,
@@ -1426,6 +1432,7 @@ helpUi = createHelpUi({ api, render, openPrefs: (pane) => prefsUi.open(pane), st
 $('btn-prefs').onclick = () => prefsUi.open();
 $('btn-help').onclick = () => helpUi.open();
 $('btn-bookmark').onclick = () => toggleBookmark();
+$('btn-read').onclick = () => readUi.toggleSpeak();
 $('btn-quick').onclick = () => palette.open();
 $('btn-split').onclick = () => split.toggle();
 api.onError(({ message }) => toast(message));
