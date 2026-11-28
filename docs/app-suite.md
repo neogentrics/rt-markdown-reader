@@ -43,7 +43,8 @@ Which app owns which *feature* is in [app-features.md](app-features.md).
 | Part | Where it is now |
 |---|---|
 | App Link | `src/main/app-link.js` in Reader, copied into each app for now |
-| Natural voices, audio export, pronunciation | Reader: `voices.js`, `supertonic.js`, `pronounce.js`, `renderer/m4b.js` |
+| Natural voices (the engine) | **Shared:** `read-aloud/` in `recon-core`. Reader takes it in at a pinned tag, into `src/main/core/read-aloud/` (`scripts/core-sync.mjs`, `core.lock`; `test/core.test.mjs` fails if a copy is changed here) |
+| Read-aloud screens, audio export, pronunciation list | Reader: `renderer/read-ui.js`, `renderer/audio-ui.js`, `renderer/m4b.js`, `pronounce.js` |
 | Dictation and speech to text | Reader: `whisper.js`, `dictation.js` |
 | AI services, including local models | Reader: `ai-providers.js` |
 | Themes and fonts | Reader, and `src/shared/themes.js` in Story Tracker |

@@ -5,7 +5,7 @@
 // lives beside the model, so removing the download removes the indexes too.
 const crypto = require('node:crypto');
 const path = require('node:path');
-const { VoiceStore } = require('./voices');
+const { VoiceStore } = require('./core/read-aloud/voices');
 
 const MODEL = 'multilingual-e5-small';
 const REVISION = '761b726dd34fb83930e26aab4e9ac3899aa1fa78';

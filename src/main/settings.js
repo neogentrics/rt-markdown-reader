@@ -5,7 +5,7 @@ const automations = require('./automations');
 const { cleanServers } = require('./servers');
 const fs = require('node:fs');
 const { cleanAiSettings } = require('./ai-providers');
-const { DEFAULT_READING, cleanReading } = require('./voice-tone');
+const { DEFAULT_READING, cleanReading } = require('./core/read-aloud/voice-tone');
 const path = require('node:path');
 
 const DEFAULTS = Object.freeze({

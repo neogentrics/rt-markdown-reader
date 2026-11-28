@@ -4,6 +4,11 @@ All notable changes to RT Markdown Reader (Neo Markdown Reader until 3.4.1) are 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+- **Read aloud's engine is now shared code.** The five files that download the natural voices and make speech moved, unchanged, into `recon-core`, a module the Recon Towers apps share, so another app can use the same engine. Reader takes them back in at a tag, into `src/main/core/read-aloud/`. `core.lock` records the tag and a hash of every file, and a test fails if a copy is changed here; to change them, change them in `recon-core`, tag it, and run `node scripts/core-sync.mjs <tag>`. Building and testing Reader need no access to that repository. Nothing about reading aloud changes.
+
 ## [3.13.1] - 2026-11-27
 
 Richer Metallic and Glass.

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
-const tone = createRequire(import.meta.url)('../src/main/voice-tone.js');
+const tone = createRequire(import.meta.url)('../src/main/core/read-aloud/voice-tone.js');
 const { warm, mixStyles, seeded, rms, peak, matchLoudness } = tone;
 
 const RATE = 44100;

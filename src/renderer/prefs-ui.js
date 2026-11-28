@@ -2,7 +2,7 @@
 // here; larger ones open their own window. Buttons run the same commands the menus used to, so anything
 // moved here can still be found with Find a Command and keeps its shortcut.
 
-import { cleanReading } from '../main/voice-tone.js';
+import { cleanReading } from '../main/core/read-aloud/voice-tone.js';
 
 const $ = (id) => document.getElementById(id);
 

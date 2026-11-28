@@ -326,12 +326,12 @@ app learns to talk to them (decision 12).
 |---|:-:|---|
 | 🙋 Pace | S | A setting for how quickly a natural voice speaks, from 0.95× to 1.35×, in *Preferences → Reading Aloud*. The Speed in the reading bar still adjusts it. |
 | 🙋 Quality | S | Faster, Balanced or Best: 8, 12 or 16 refinement steps. A computer that can't keep up steps down by itself and goes back up if it catches up. |
-| 🙋 Warmth | S | A gentle tone filter after the voice is made (more body, a softer top, light smoothing, the same loudness): 0.90 to 1.20, or off. Our own filter, in `src/main/voice-tone.js`. |
+| 🙋 Warmth | S | A gentle tone filter after the voice is made (more body, a softer top, light smoothing, the same loudness): 0.90 to 1.20, or off. Our own filter, in `src/main/core/read-aloud/voice-tone.js`. |
 | 🙋 Breathing | S | The model's own breath and sigh tags: at the start and end of a reading, or around each paragraph. Never in a heading. Off to begin with. |
 | Dashes as pauses | S | A dash is read as a pause instead of a plain hyphen. Ranges and hyphenated words are left alone. |
 | Less dead air | S | The model's silence before and after every sentence is cut, so sentences follow each other in about 0.4 s instead of 0.7 s, and the first sentence of a reading has no hole in the middle. |
 | Voice lab | S | `scripts/voice-lab.mjs` makes comparison clips of any setting with the real model, so the next change can be chosen by ear too. |
-| Blended voices | M | Nine more voices after the ten, each made on the computer by mixing two of them half and half (`BLENDS` in `src/main/voice-text.js`, `mixStyles` in `src/main/voice-tone.js`). Nothing more to download. Marked *blended* in the list. The pairs and names were chosen by Claude, not the owner, who can ask for changes. |
+| Blended voices | M | Nine more voices after the ten, each made on the computer by mixing two of them half and half (`BLENDS` in `src/main/core/read-aloud/voice-text.js`, `mixStyles` in `src/main/core/read-aloud/voice-tone.js`). Nothing more to download. Marked *blended* in the list. The pairs and names were chosen by Claude, not the owner, who can ask for changes. |
 
 ## v3.13 — Metallic finish
 

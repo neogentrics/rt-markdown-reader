@@ -9,9 +9,9 @@ import crypto from 'node:crypto';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const text = require('../src/main/voice-text.js');
-const { VoiceStore, FILES, REVISION } = require('../src/main/voices.js');
-const { gaussian } = require('../src/main/supertonic.js');
+const text = require('../src/main/core/read-aloud/voice-text.js');
+const { VoiceStore, FILES, REVISION } = require('../src/main/core/read-aloud/voices.js');
+const { gaussian } = require('../src/main/core/read-aloud/supertonic.js');
 const { PronunciationStore } = require('../src/main/pronounce.js');
 
 test('voices: text is normalised, symbols are spoken or dropped, and it is tagged with its language', () => {
@@ -183,8 +183,8 @@ test('natural voices: the model’s silence is trimmed to head and tail, and war
 });
 
 test('pronunciation: whole words in any capitals, longest first, and nothing replaced twice', () => {
-  const list = [{ word: 'Zeryl', say: 'Zair-ill' }, { word: 'New', say: 'Knew' }, { word: 'New Orleans', say: 'Nawlins' }, { word: 'Knew', say: 'WRONG' }, { word: 'C++', say: 'C plus plus' }];
-  assert.equal(text.applyPronunciation('zeryl met Zeryls in New Orleans.', list), 'Zair-ill met Zeryls in Nawlins.');
+  const list = [{ word: 'Siobhan', say: 'Shiv-awn' }, { word: 'New', say: 'Knew' }, { word: 'New Orleans', say: 'Nawlins' }, { word: 'Knew', say: 'WRONG' }, { word: 'C++', say: 'C plus plus' }];
+  assert.equal(text.applyPronunciation('siobhan met Siobhans in New Orleans.', list), 'Shiv-awn met Siobhans in Nawlins.');
   assert.equal(text.applyPronunciation('New news, written in C++!', list), 'Knew news, written in C plus plus!');
   assert.equal(text.applyPronunciation('Nothing here', []), 'Nothing here');
 });
@@ -228,7 +228,7 @@ test('breathing: a breath before the first sentence and a sigh after the last, b
 });
 
 test('blended voices: each is a half-and-half mix of two real voices, with its own name, and is offered after the ten (3.12)', async () => {
-  const { VOICES } = await import('../src/main/voices.js');
+  const { VOICES } = await import('../src/main/core/read-aloud/voices.js');
   const names = [...text.SINGLE_VOICES.map((id) => text.VOICE_NAMES[id]), ...Object.values(text.BLENDS).map((b) => b.name)];
   assert.equal(new Set(names).size, 19, 'no two voices share a name');
   assert.deepEqual(VOICES, [...text.SINGLE_VOICES, ...Object.keys(text.BLENDS)]);

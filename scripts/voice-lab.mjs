@@ -12,10 +12,10 @@ import { pathToFileURL, fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
-const { Supertonic, voiceStyle } = require('../src/main/supertonic.js');
-const { VOICE_NAMES } = require('../src/main/voice-text.js');
-const { warm, mixStyles, seeded, matchLoudness, trimSilence, DEFAULT_READING, QUALITY } = require('../src/main/voice-tone.js');
-const { breathAt, withBreath, BLENDS: SHIPPED_BLENDS, SINGLE_VOICES, VOICE_NAMES: NAMES } = require('../src/main/voice-text.js');
+const { Supertonic, voiceStyle } = require('../src/main/core/read-aloud/supertonic.js');
+const { VOICE_NAMES } = require('../src/main/core/read-aloud/voice-text.js');
+const { warm, mixStyles, seeded, matchLoudness, trimSilence, DEFAULT_READING, QUALITY } = require('../src/main/core/read-aloud/voice-tone.js');
+const { breathAt, withBreath, BLENDS: SHIPPED_BLENDS, SINGLE_VOICES, VOICE_NAMES: NAMES } = require('../src/main/core/read-aloud/voice-text.js');
 const { openingOf } = await import('../src/renderer/read-ui.js');
 const { measure } = await import('./voice-measure.mjs');
 
