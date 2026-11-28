@@ -1,9 +1,9 @@
 /* Your apps at a glance (3.14): the toolbar button's dot, and the Apps panel. */
-.tb-apps { position: relative; }
-/* It stands where the icon's fourth square would, so it covers nothing: the square's middle is 3.75px right and down
-   from the button's, in a 19px icon. */
+/* It stands where the icon's fourth square would, so it covers nothing: that square's middle is 70% of the way across
+   and down the icon, whatever the icon's size. */
+.apps-icon { position: relative; display: inline-flex; }
 .apps-dot {
-  position: absolute; left: calc(50% - .75px); top: calc(50% - .75px); width: 9px; height: 9px; border-radius: 50%;
+  position: absolute; left: calc(69.8% - 4.5px); top: calc(69.8% - 4.5px); width: 9px; height: 9px; border-radius: 50%;
   border: 1.5px solid var(--heading); background: transparent;      /* off: an empty ring */
 }
 /* The panel has the words: colour is never the only signal. */
@@ -27,3 +27,31 @@
 .app-info .app-line { color: var(--text-soft); overflow-wrap: anywhere; }
 .app-buttons { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 12px; flex: none; max-width: 45%; }
 .apps-off { margin: 8px 0; color: var(--text); font-size: 13px; }
+
+/* The toolbar you control (3.14). Off by your choice, or moved to "More" for room; the tutorial can show one again. */
+.tb-right > :is([data-off], [data-overflow]):not([data-reveal]) { display: none !important; }
+.tb-right.compact { gap: 1px; }
+.tb-right.compact .tb-btn { height: 28px; min-width: 28px; padding: 0 5px; gap: 4px; }
+.tb-right.compact .tb-btn svg { width: 16px; height: 16px; }
+.tb-right.compact .apps-dot { width: 8px; height: 8px; left: calc(69.8% - 4px); top: calc(69.8% - 4px); }
+.tb-right.named .tb-name { font-size: 12.5px; white-space: nowrap; }
+.tb-right.compact.named .tb-name { font-size: 11.5px; }
+.tb-more { position: relative; }
+.popover.more-menu { width: 230px; padding: 6px; max-height: calc(100vh - 110px); overflow-y: auto; }
+.more-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 7px 10px; border: 0; border-radius: 7px; background: transparent; color: var(--text); font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
+.more-item:hover:not(:disabled), .more-item:focus-visible { background: var(--btn-hover); }
+.more-item:disabled { opacity: .45; cursor: default; }
+.more-item svg { width: 17px; height: 17px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.toolbar-dlg { width: min(520px, calc(100vw - 32px)); }
+.toolbar-list { list-style: none; margin: 8px 0 12px; padding: 0; max-height: 46vh; overflow-y: auto; }
+.toolbar-list li { display: flex; align-items: center; gap: 14px; padding: 4px 0; border-bottom: 1px solid var(--rule); }
+.toolbar-list li:last-child { border-bottom: 0; }
+.toolbar-list .check { flex: 1; margin: 0; }
+.toolbar-list .link-btn:disabled { opacity: .35; cursor: default; text-decoration: none; }
+
+/* Names beside icons: Blue's toolbar ends in teal, and with Metallic the button's faint white plate there lifts it just past
+   what white words can take ("Apps", 4.44:1). That one plate goes without its tint. The shared look (recon-theme) isn't
+   edited here; test/e2e/metallic.e2e.cjs measures every name in every theme. */
+@media screen and (forced-colors: none) and (prefers-contrast: no-preference) {
+  :root[data-theme="blue"][data-surface="metallic"] .tb-right.named .tb-apps { background-color: transparent; }
+}

@@ -198,7 +198,7 @@ Every app should feel like the same family. RT Markdown Reader is the reference,
 
 **Themes and fonts.** The full rules (the ten themes, the colour tokens, the Solid, Metallic and Glass looks, and contrast) are in [app-theming.md](app-theming.md). In short: the shared themes (Paper, Sepia, Night, Mist, Forest, Dusk, High Contrast, Blue, Red and Yellow), *Follow System*, the *Solid*, *Metallic* and *Glass* looks (the page and editor stay flat in all three), the *Colour-safe* option for colour blindness, *Customize Theme* for your own colours, and the shared choice of fonts. The theme button is visible on the main screen, not buried. A test measures the contrast of every theme.
 
-**The toolbar.** Icon buttons, each with a name that shows on hover and is read out by screen readers. Only the commonly used ones are there, and the rest are in the menus. Reader's v3.14 makes the toolbar adjustable (hide, reorder, shrink, names beside icons), and the other apps copy that when it exists. The apps status icon sits at the right end.
+**The toolbar.** Icon buttons, each with a name that shows on hover and is read out by screen readers. Only the commonly used ones are there, and the rest are in the menus. Reader 3.14 (not yet released) makes the toolbar adjustable (*Customize Toolbar…*: hide, reorder, shrink, names beside icons; buttons that don't fit move into *More*), and the other apps copy that. The apps status icon sits at the right end.
 
 **Updates.** Where the system allows it, the app updates itself: a message says "Version X is ready to install" with a *Restart to update* button. Where it can't (Mac, the `.deb`, the portable build), the message links to the download.
 
