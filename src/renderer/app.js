@@ -34,6 +34,7 @@ import { createAudioUi } from './audio-ui.js';
 import { createDictateUi } from './dictate-ui.js';
 import { createTourUi } from './tour-ui.js';
 import { createPrefsUi } from './prefs-ui.js';
+import { createAppsUi } from './apps-ui.js';
 import { createHelpUi } from './help-ui.js';
 import { resolveWiki, relative, dirOf, slugify as wikiSlug } from '../main/notes-core.js';
 import './styles/app.css';
@@ -91,6 +92,7 @@ let audioUi = null;
 let dictateUi = null;
 let tourUi = null;
 let prefsUi = null;
+let appsUi = null;
 let helpUi = null;
 const uiText = createUiTranslator();
 
@@ -393,6 +395,7 @@ function sendSync() {
   api.syncTabs({
     tabs: saved.map((t) => ({ path: t.doc.path, scroll: t.scroll })),
     active: Math.max(0, saved.indexOf(active)),
+    current: active?.doc.path || '',
     title: active ? active.doc.name : '',
   });
 }
@@ -1001,6 +1004,7 @@ api.onCommand(({ cmd, arg }) => {
     case 'ai-guide': helpUi.open('ai'); break;
     case 'help-center': helpUi.open(); break;
     case 'preferences': prefsUi.open(arg); break;
+    case 'apps': appsUi.open(); break;
     case 'connect-claude': connectorUi.open(); break;
     case 'open-claude-code': connectorUi.openClaudeCode(); break;
     case 'addon-export': if (arg) addonsUi.exportWith(arg); break;
@@ -1416,7 +1420,8 @@ presenter = createPresenter({ api, activeTab, toast, reading: () => readUi });
 sayUi = createSayUi({ api, activeTab, reading: () => readUi });
 audioUi = createAudioUi({ api, toast, activeTab, settings: () => settings, reading: () => readUi });
 dictateUi = createDictateUi({ api, toast, activeTab, settings: () => settings });
-prefsUi = createPrefsUi({ api, settings: () => settings, toast, refreshVoices: () => readUi.refreshVoices(), openHelp: () => helpUi.open() });
+appsUi = createAppsUi({ api, toast, openPreferences: (pane) => prefsUi.open(pane) });
+prefsUi = createPrefsUi({ api, settings: () => settings, toast, refreshVoices: () => readUi.refreshVoices(), openHelp: () => helpUi.open(), showApps: () => appsUi.showInPreferences() });
 helpUi = createHelpUi({ api, render, openPrefs: (pane) => prefsUi.open(pane), startTutorial: () => tourUi.start() });
 $('btn-prefs').onclick = () => prefsUi.open();
 $('btn-help').onclick = () => helpUi.open();

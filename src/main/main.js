@@ -21,6 +21,10 @@ const ai = require('./ai');
 const providers = require('./ai-providers');
 const connector = require('./connector');
 const appLink = require('./app-link');
+const installedApps = require('./installed');
+const suite = require('./suite-apps');
+const { appRows } = require('./apps-list');
+const { Versions, VERSIONS_URL } = require('./suite-versions');
 const linkPictures = require('./link-pictures');
 const storyTracker = require('./story-tracker');
 const claudeCode = require('./claude-code');
@@ -874,6 +878,8 @@ function rebuildMenu() {
         moved(cmd('split-link', 'Link Scrolling in Split View')),
         moved(cmd('back', 'Back', isMac ? 'Cmd+[' : 'Alt+Left')),
         ...(isMac ? [] : [moved({ id: 'toggle-menubar', label: 'Always Show Menu Bar', type: 'checkbox', checked: s.showMenuBar, click: () => setSetting({ showMenuBar: !settings.get().showMenuBar }) })]),
+        cmd('apps', 'Recon Towers Apps…'),
+        { type: 'separator' },
         { role: 'togglefullscreen' },
         ...(app.isPackaged ? [] : [{ role: 'toggleDevTools' }]),
       ],
@@ -1232,6 +1238,80 @@ function loadLinks() {
 function saveLinks(links) {
   if (secureStorage()) fs.writeFileSync(linksFile(), safeStorage.encryptString(JSON.stringify(links)));
   else linksMemory = { ...links };             // kept until the app closes, never in a plain file
+  appsChanged();                               // linked or unlinked, from either side
+}
+
+/** Tell the windows to look at the other apps again: only when something here changed, never on a timer. */
+function appsChanged() {
+  setImmediate(() => { for (const { win } of liveStates()) win.webContents.send('apps:changed'); });
+}
+
+// ---------------------------------------------------------------- Your apps at a glance (3.14)
+const linkFolder = () => appLink.sharedFolder({ home: app.getPath('home') });
+
+/**
+ * Say this app is installed, so the others can find it while it's closed. The file holds no secrets, and nothing connects
+ * to anything because of it, so it's written whether or not App Link is on. Only an installed copy writes one.
+ */
+function registerInstalled() {
+  const launch = app.isPackaged ? installedApps.launchPathFor({ execPath: process.execPath }) : process.env.NMR_LAUNCH_PATH;
+  if (!launch) return;
+  try { installedApps.writeInstalled(linkFolder(), { id: appLink.APP_ID, name: appLink.APP_NAME, version: app.getVersion(), launch }); } catch { /* the others just won't see it while it's closed */ }
+}
+
+// The latest versions, from the Recon Towers site. A copy run from source asks only when a test gives it an address.
+let suiteVersions = null;
+function versionsSource() {
+  const on = app.isPackaged ? !process.env.NMR_DISABLE_UPDATES : !!process.env.NMR_VERSIONS_URL;
+  if (!on) return null;
+  suiteVersions ??= new Versions({
+    fetch: (url, opts) => net.fetch(url, opts),
+    url: (!app.isPackaged && process.env.NMR_VERSIONS_URL) || VERSIONS_URL,
+    file: path.join(app.getPath('userData'), 'suite-versions.json'),
+  });
+  return suiteVersions;
+}
+
+/**
+ * Everything the Apps panel shows. `look` is how far to go for newer versions: 'quiet' uses only what's remembered (the
+ * toolbar's first look, which sends nothing), 'panel' asks if the answer is old, and 'refresh' asks again.
+ * Paths to programs and link keys stay here: the page never gets them.
+ */
+async function appsStatus(look = 'quiet') {
+  const on = settings.get().appLink && !!linkServer;
+  const source = versionsSource();
+  let updates = { state: 'unavailable', apps: {} };
+  if (source) {
+    if (look === 'quiet') { source.answer ??= source.load(); updates = source.answer || updates; }
+    else updates = await source.check({ force: look === 'refresh' });
+  }
+  const running = linkServer ? await linkServer.found() : [];
+  const links = loadLinks();
+  const apps = appRows({
+    self: appLink.APP_ID,
+    mine: { protocol: appLink.PROTOCOL, minProtocol: appLink.MIN_PROTOCOL, accepts: appLink.ACCEPTS },
+    installed: installedApps.readInstalled(linkFolder()),
+    running,
+    links,
+    latest: updates.apps,
+    fromInstaller: installedApps.fromInstaller,
+  });
+  // Only linked apps that are running are asked what they're doing. One that can't say just says nothing.
+  await Promise.all(apps.filter((a) => a.linked && a.running).map(async (a) => {
+    try { a.line = (await linkServer.statusOf(a.id, running.find((r) => r.id === a.id))).line; } catch { /* nothing to show */ }
+  }));
+  return { on, safe: secureStorage(), apps, updates: updates.state, dot: suite.dotOf({ on, apps }) };
+}
+
+let exportingAudio = () => false;       // set where audio exports are kept
+
+/** What this app is doing, for a linked app's `status`: a short line with no writing in it. A locked document says nothing. */
+function statusForLink() {
+  const st = targetState();
+  const open = st?.current || '';
+  if (open && isLockedPath(open)) return { state: 'idle' };
+  if (exportingAudio()) return { state: 'busy', line: 'Exporting audio' };
+  return open ? { state: 'open', line: `Open: “${path.basename(open)}”` } : { state: 'idle' };
 }
 
 /** Ask the person, in this app, whether another app may link with it. */
@@ -1526,7 +1606,7 @@ async function applyLink() {
     folder: appLink.sharedFolder({ home: app.getPath('home') }),
     dataDir: app.getPath('userData'),
     version: app.getVersion(),
-    load: loadLinks, save: saveLinks, ask: askToLink, open: openFromLink,
+    load: loadLinks, save: saveLinks, ask: askToLink, open: openFromLink, status: statusForLink,
   });
   await server.start();
   linkServer = server;
@@ -1769,6 +1849,8 @@ function registerIpc() {
       .slice(0, 100)
       .map((t) => ({ path: t.path, scroll: Number.isFinite(t.scroll) ? Math.min(1, Math.max(0, t.scroll)) : 0 }));
     st.active = Number.isInteger(payload.active) ? Math.max(0, Math.min(payload.active, st.tabs.length - 1)) : 0;
+    // The document in front, if it's a saved one: an unsaved one has no name worth telling a linked app.
+    st.current = st.tabs.some((t) => t.path === payload.current) ? payload.current : '';
     const title = isStr(payload.title, 300) ? `${payload.title} — RT Markdown Reader` : 'RT Markdown Reader';
     if (st.win.getTitle() !== title) st.win.setTitle(title);
     if (isMac) st.win.setRepresentedFilename(st.tabs[st.active]?.path || '');
@@ -2920,7 +3002,8 @@ function registerIpc() {
   ipcMain.handle('link:status', () => linkStatus());
   ipcMain.handle('link:set', async (_e, on) => {
     settings.update({ appLink: on === true });
-    try { await applyLink(); } catch { settings.update({ appLink: false }); return { ...(await linkStatus()), error: 'App Link couldn’t start.' }; }
+    try { await applyLink(); } catch { settings.update({ appLink: false }); appsChanged(); return { ...(await linkStatus()), error: 'App Link couldn’t start.' }; }
+    appsChanged();
     return linkStatus();
   });
   ipcMain.handle('link:pair', async (_e, id) => {
@@ -2930,6 +3013,21 @@ function registerIpc() {
   ipcMain.handle('link:unlink', async (_e, id) => {
     if (linkServer && appLink.validId(id)) await linkServer.unlink(id);
     return linkStatus();
+  });
+  // ---- Your apps at a glance (3.14)
+  ipcMain.handle('apps:status', (_e, look) => appsStatus(['panel', 'refresh'].includes(look) ? look : 'quiet'));
+  // Open: start an installed app of the suite, because the person asked. The path comes from its file, read again now.
+  ipcMain.handle('apps:open', async (_e, id) => {
+    const entry = appLink.validId(id) && id !== appLink.APP_ID ? installedApps.readInstalled(linkFolder()).find((a) => a.id === id) : null;
+    if (!entry) return { error: 'That app isn’t where it was installed any more.' };
+    try { await installedApps.launchInstalled(entry); return {}; } catch (err) { return { error: err.message }; }
+  });
+  // Get it, or Download: the app's page. The address comes from our own list, or the site's versions file, never from the page.
+  ipcMain.handle('apps:get', async (_e, id) => {
+    const known = suite.appById(id);
+    if (!known || known.id === appLink.APP_ID) return { error: 'That app isn’t known.' };
+    await shell.openExternal(versionsSource()?.answer?.apps?.[id]?.url || known.page);
+    return {};
   });
   ipcMain.handle('link:send', async (e, doc) => {
     if (typeof doc?.text !== 'string' || doc.locked || (doc.path && isLockedPath(doc.path))) return { error: 'Password-locked documents can’t be sent.' };
@@ -3074,6 +3172,7 @@ function registerIpc() {
     await dropAudio(job);
   });
   app.on('will-quit', () => { for (const job of audioJobs.values()) { job.file.close().catch(() => {}); fs.rmSync(job.part, { force: true }); } });
+  exportingAudio = () => audioJobs.size > 0;
 
   ipcMain.handle('dictate:status', () => dictation.status());
   ipcMain.handle('dictate:install', async (e) => {
@@ -3319,7 +3418,8 @@ app.whenReady().then(() => {
   cardStore.onChange = () => sync.soon();
   sync.start();
   applyConnector().catch(() => {});
-  applyLink().catch(() => {});
+  registerInstalled();
+  applyLink().then(appsChanged, () => {});
   storyHandover.sweep();
   applyInbound().catch(() => {});
   voices = new VoiceStore({

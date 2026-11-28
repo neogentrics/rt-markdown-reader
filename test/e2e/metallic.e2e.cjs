@@ -87,7 +87,8 @@ const step = async (name, fn) => { await fn(); console.log('ok -', name); };
       const style = document.createElement('style');
       style.id = 'm-hide';
       style.textContent = '*, *::before, *::after { color: transparent !important; -webkit-text-fill-color: transparent !important; text-shadow: none !important; caret-color: transparent !important; }'
-        + ' svg, svg * { stroke: transparent !important; fill: transparent !important; } ::placeholder { color: transparent !important; }';
+        + ' svg, svg * { stroke: transparent !important; fill: transparent !important; } ::placeholder { color: transparent !important; }'
+        + ' .apps-dot { visibility: hidden !important; }';        // part of its button's icon, not something behind it
       document.head.append(style);
     });
     await win.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));

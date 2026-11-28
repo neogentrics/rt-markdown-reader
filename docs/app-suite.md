@@ -52,7 +52,7 @@ Which app owns which *feature* is in [app-features.md](app-features.md).
 
 ## Still to add: finding apps that are installed
 
-App Link today only sees an app while it's running. The owner wants the apps to detect each other when they're installed, and to see what each other is doing when they're running. These are additions to protocol version 1, which an app that doesn't know them ignores. They aren't built yet.
+App Link by itself only sees an app while it's running. The owner wants the apps to detect each other when they're installed, and to see what each other is doing when they're running. These are additions to protocol version 1, which an app that doesn't know them ignores. The installed list, the Apps panel and `status` are built in RT Story Tracker and in RT Markdown Reader 3.14 (not yet released); the rules every app follows are in [app-link.md](app-link.md).
 
 **Installed list.** On first run and after each update, an app writes `installed/<id>.json` in the App Link folder, and removes it when it's uninstalled:
 
@@ -114,7 +114,7 @@ The first idea for this, from the Recon Browser side, used an `rtstory://` link 
 
 ## Apps status in every app
 
-Planned, not built. Every app in the suite shows the same small indicator, so the owner can see what is linked at a glance. It was his idea (2026-11-18), and it is the Apps panel from "Still to add" above with a place to see it.
+Built in RT Story Tracker, and in RT Markdown Reader from 3.14 (not yet released). Every app in the suite shows the same small indicator, so the owner can see what is linked at a glance. It was his idea (2026-11-18), and it is the Apps panel from "Still to add" above with a place to see it.
 
 **Where.** A small icon at the right end of the toolbar, or the app's nearest equivalent, with a coloured dot and the name *Recon Towers apps* on hover and for screen readers. Clicking it opens the panel. The icon only summarises: the panel carries the words, so colour is never the only signal.
 
@@ -134,6 +134,17 @@ Planned, not built. Every app in the suite shows the same small indicator, so th
 | Installed, not running | Open |
 | Not installed | Get it (opens that app's page on the Recon Towers store) |
 
+**The shared list.** Each app keeps a copy (`src/main/suite-apps.js` in Reader, `src/shared/suite-apps.js` in Story Tracker). A new app is one more row. Pages that don't exist yet open the store's list of projects.
+
+| App Link id | Name | The short line | “Get it” opens |
+|---|---|---|---|
+| `rt-markdown-reader` | RT Markdown Reader | Read, edit, listen to and publish documents | https://recontowers.com/projects/ |
+| `rt-story-tracker` | RT Story Tracker | Write the book, and keep the story bible | https://recontowers.com/projects/storytracker/ |
+| `rt-author-desk` | RT Author Desk | Catalog, accounts, launches and royalties | https://recontowers.com/projects/ |
+| `rt-press` | RT Press | Designed print interiors and cover wraps | https://recontowers.com/projects/ |
+| `rt-audio-studio` | RT Audio Studio | Audiobooks and podcasts | https://recontowers.com/projects/ |
+| `recon-browser` | Recon Browser | A browser for research, which sends clips to your story | https://recontowers.com/projects/ |
+
 **Rules.**
 
 - Finding an app never links it. *Link* asks for the same one-time approval as in [app-link.md](app-link.md).
@@ -148,7 +159,7 @@ Planned, not built. Every app in the suite shows the same small indicator, so th
 
 ## Updates and compatibility
 
-Planned, not built. It goes with the apps status panel above, and it was the owner's idea (2026-11-18): the panel should tell him when a suite app has a newer version.
+Built in RT Story Tracker and in RT Markdown Reader 3.14; the site doesn't publish the versions file yet, so no app shows a newer version today. It goes with the apps status panel above, and it was the owner's idea (2026-11-18): the panel should tell him when a suite app has a newer version.
 
 **What decides whether two apps link.** Their App Link version and the kinds of document each says it accepts (`hello` already returns both), never the app's own version number. Two apps on different releases link fine if the protocol matches. Most releases don't touch App Link, so they must never break a link.
 

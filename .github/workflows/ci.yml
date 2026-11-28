@@ -75,12 +75,22 @@ jobs:
           Start-Process -Wait -FilePath $setup.FullName -ArgumentList '/S'
           powershell -NoProfile -STA -ExecutionPolicy Bypass -File preview/ci-check.ps1 -Installed
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          # The installed list (3.14): the installer says Reader is here, with a path that really starts it.
+          $listed = Join-Path $env:APPDATA 'Recon Towers\app-link\installed\rt-markdown-reader.json'
+          if (-not (Test-Path $listed)) { throw "The installer didn't write $listed" }
+          $entry = Get-Content -Raw -Encoding UTF8 $listed | ConvertFrom-Json
+          $version = (Get-Content -Raw package.json | ConvertFrom-Json).version
+          if ($entry.id -ne 'rt-markdown-reader' -or $entry.protocol -ne 1 -or $entry.version -ne $version) { throw "The installed file is wrong: $(Get-Content -Raw $listed)" }
+          if (-not (Test-Path -LiteralPath $entry.launch -PathType Leaf) -or $entry.launch -notmatch '\.exe$') { throw "The installed file's path doesn't start the app: $($entry.launch)" }
+          node -e "const {readInstalled}=require('./src/main/installed.js'); const a=readInstalled(process.env.APPDATA+'\\Recon Towers\\app-link'); if(!a.some(x=>x.id==='rt-markdown-reader'&&x.known)) { console.error(JSON.stringify(a)); process.exit(1) } console.log('the app reads the installer\'s file')"
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
           $dir = Join-Path $env:LOCALAPPDATA 'Programs\neo-markdown-reader'
           if (-not (Test-Path $dir)) { $dir = Join-Path $env:LOCALAPPDATA 'Programs\RT Markdown Reader' }
           $un = Get-ChildItem $dir -Filter 'Uninstall*.exe' | Select-Object -First 1
           Start-Process -Wait -FilePath $un.FullName -ArgumentList '/S', "_?=$dir"
           powershell -NoProfile -File preview/ci-check.ps1 -Uninstalled
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          if (Test-Path $listed) { throw "Uninstalling left $listed behind" }
       - name: Update from the last version with the old name, for one person and for everyone
         shell: powershell
         env:

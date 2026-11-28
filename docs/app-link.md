@@ -45,6 +45,25 @@ The file is named after the app's id, such as `rt-markdown-reader.json`:
 - The file holds no secrets. An app removes its file when it stops.
 - A file can be left behind by a crash. If an app can't be reached, it isn't running.
 
+## The installed list
+
+So that an app can be found while it's closed, each one also says it's installed, in `installed/<id>.json` in the same folder (from Reader 3.14 and Story Tracker 3.8):
+
+```json
+{ "id": "rt-markdown-reader", "name": "RT Markdown Reader", "version": "3.14.0", "launch": "C:\\Users\\me\\AppData\\Local\\Programs\\neo-markdown-reader\\RT Markdown Reader.exe", "protocol": 1 }
+```
+
+- An app writes it each time it starts (an installer may write it too, so a new install is found before it has been opened),
+  and the uninstaller removes it. It holds no secrets, so it's written whether or not App Link is on.
+- `launch` is the full path of what the person runs: the program, the `.app` on a Mac, the AppImage, or a portable `.exe`.
+- An app counts as installed only while `launch` still exists. A file left behind is ignored, and left alone: it belongs to the
+  other app.
+- `minProtocol` is optional, as in `hello`.
+
+Any program running as this person can write one of these files, so before **starting** anything an app must check that the id
+is one of the suite's own, that `launch` is a full path on this computer (never one such as `\\server\share`) to a real
+program, and start it with no arguments and no shell, and only because the person just asked.
+
 ## Talking to an app
 
 Connect to the endpoint and send one JSON object per line, in UTF-8. Each line gets one line back, with the same `id`:
@@ -77,11 +96,11 @@ A line can be at most 8 MB. Show `message` to the person if you need to; decide 
 
 ## Methods
 
-Every app implements all four.
+Every app implements the four below: `hello`, `pair`, `open_document` and `unlink`. `status` is an addition: an app that doesn't have it answers `unknown_method`, and the caller carries on without it.
 
 ### `hello`
 
-Needs no key. Returns `protocol`, `app`, `name`, `version` and `accepts`, the kinds of document the app takes.
+Needs no key. Returns `protocol`, `app`, `name`, `version` and `accepts`, the formats of document the app takes. It may also return `minProtocol`, the oldest protocol it still links with (1 if it isn't given). Only these, never the apps' own version numbers, decide whether two apps can link. From 3.14, Reader sends `protocol`, `minProtocol` and `accepts` with `pair` too.
 
 ### `pair`
 
@@ -152,6 +171,22 @@ What RT Markdown Reader does with them:
   follow them.
 
 RT Markdown Reader doesn't use `kind`: it accepts it and ignores it.
+
+### `status`
+
+For a linked app only (it needs the key). Says what the app is doing:
+
+```json
+{ "id": 8, "method": "status", "params": { "app": "rt-story-tracker", "key": "…" } }
+{ "id": 8, "result": { "state": "open", "line": "Open: “Chapter 1.md”" } }
+```
+
+`state` is `idle`, `open` or `busy`. `line` is a short line to show the person (at most 80 characters), left out when idle. It
+never holds any of a document's text, and anything password-locked answers `idle` with no line, so it can't be told from nothing
+open. Show the line as plain text: it's another program's claim.
+
+RT Markdown Reader answers `open` with the **file name** of the saved document in front, `busy` while it's exporting audio, and
+`idle` when the document in front is unsaved or password-locked, or none is open.
 
 ### `unlink`
 

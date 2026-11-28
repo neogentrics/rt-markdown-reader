@@ -20,6 +20,29 @@ A document sent to you opens as a new, unsaved document, so nothing is saved unt
 straight away, and go in an `images` folder beside the document when you save it. A linked app can't read or change your
 documents on its own, and password-locked documents are never sent. Remove a link in the same place.
 
+### Your apps at a glance
+
+The button at the right end of the toolbar (or *View → Recon Towers Apps…*) shows every Recon Towers app, and the same list is
+in [Preferences → Linked Apps](#do=preferences:link). Its dot sums it up, and its name says the same in words:
+
+| Dot | Means |
+|---|---|
+| Green | At least one other app is linked |
+| Amber | Other apps were found, but none is linked |
+| Grey | No other app was found |
+| Empty ring | App Link is off |
+
+Each app is **Linked**, **Found, not linked** (it's open), **Installed, not running** or **Not installed**, with a button to
+match: **Open** starts it, **Link** asks it to link (you answer over there), and **Get it** opens its page. Finding an app
+never links it. The list looks when you open it, when you press **Refresh** and when a link changes, never on a timer.
+
+A linked app that's open shows a short line about what it's doing. If it asks the same of Reader, it learns only the file name
+of the document in front. A locked or unsaved document is never named.
+
+When the list is open, Reader may also ask the Recon Towers website for the latest version numbers, at most once a day. It
+sends nothing about you or your computer. If an app has a newer version, you see **Update available**. This never stops two apps
+linking: only a change to App Link itself can.
+
 ### Send to RT Story Tracker
 
 *File → This Document → Send to StoryTracker* sends what's on screen to RT Story Tracker, which asks you where it goes. It

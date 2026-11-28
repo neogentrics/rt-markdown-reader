@@ -46,7 +46,7 @@ major version, 4.0, is kept for a change to what the app is: the writing studio.
 | [v3.11](#v311--working-with-rt-story-tracker) | Working with RT Story Tracker | ✅ Released ([3.11.0](https://github.com/neogentrics/rt-markdown-reader/releases/tag/v3.11.0)) |
 | [v3.12](#v312--warmer-livelier-voices) | Warmer, livelier voices | ✅ Released ([3.12.0](https://github.com/neogentrics/rt-markdown-reader/releases/tag/v3.12.0)) |
 | [v3.13](#v313--metallic-finish) | Metallic finish | ✅ Released ([3.13.0](https://github.com/neogentrics/rt-markdown-reader/releases/tag/v3.13.0)) · ✅ [3.13.1](https://github.com/neogentrics/rt-markdown-reader/releases/tag/v3.13.1) |
-| [v3.14](#v314--your-apps-at-a-glance) | Your apps at a glance | Planned |
+| [v3.14](#v314--your-apps-at-a-glance) | Your apps at a glance | 🔨 In progress |
 | [v3.15](#v315--writing-patterns) | Writing patterns | Planned |
 | [v4.0](#v40--writing-studio) | Writing studio | Planned |
 | [Later](#later--only-if-needed) | Only if needed | Ideas |
@@ -357,11 +357,11 @@ Metallic is layered gradients, not blur: a light highlight along the top, a dark
 
 ## v3.14 — Your apps at a glance
 
-🙋 See the other Recon Towers apps from inside this one, and tidy the toolbar. Raised by the owner on 2026-11-18.
+🙋 See the other Recon Towers apps from inside this one, and tidy the toolbar. Raised by the owner on 2026-11-18; the owner said to build it on 2026-11-28. 🔨 **In progress:** the apps status is built; the toolbar is next. Not released.
 
 | Feature | Size | Details |
 |---|:-:|---|
-| 🙋 Apps status | M | A small indicator in the toolbar that says whether other Recon Towers apps are **linked**, **found but not linked**, or **not installed**. Click it to see every app in the suite: installed or not, running or not, linked or not, with buttons to link it or open it. Finding an app never links it: you approve once, as now. If App Link is off, it says so and offers to turn it on. Needs the installed list and Apps panel planned in [docs/app-suite.md](docs/app-suite.md), which RT Story Tracker builds first (its v3.8). New apps appear here by an update, with no change to how the rest works. It also shows when an installed app has a newer version, with a button to update it or download it. Whether two apps can link is decided by their App Link versions, not their app versions, so an ordinary release never breaks a link. |
+| ✅ 🙋 Apps status | M | A small indicator in the toolbar that says whether other Recon Towers apps are **linked**, **found but not linked**, or **not installed**. Click it to see every app in the suite: installed or not, running or not, linked or not, with buttons to link it or open it. Finding an app never links it: you approve once, as now. If App Link is off, it says so and offers to turn it on. Needs the installed list and Apps panel planned in [docs/app-suite.md](docs/app-suite.md), which RT Story Tracker builds first (its v3.8). New apps appear here by an update, with no change to how the rest works. It also shows when an installed app has a newer version, with a button to update it or download it. Whether two apps can link is decided by their App Link versions, not their app versions, so an ordinary release never breaks a link. |
 | 🙋 A toolbar you control | M | Hide, reorder and shrink the buttons on the right, show a name beside each icon if you want, and add a *Read Aloud* button, which is only in the View menu today. Anything hidden stays in the menus and in `Ctrl+K`. |
 
 ## v3.15 — Writing patterns

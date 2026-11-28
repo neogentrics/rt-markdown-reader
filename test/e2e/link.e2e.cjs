@@ -247,10 +247,13 @@ function standIn(id = 'stand-in', name = 'Stand-In App') {
   await step('the Linked Apps pane shows the link, and Remove tells the other app', async () => {
     await menu('preferences');
     await win.click('.prefs-nav [data-pane="link"]');
-    await win.waitForFunction(() => /Stand-In App/.test(document.getElementById('pref-link-list').textContent));
+    const row = '#pref-link-list .app-row[data-app="stand-in"]';
+    await win.waitForSelector(`${row}[data-state="linked"]`);
+    assert.match(await win.textContent(row), /Stand-In App/);
     assert.equal(await win.isChecked('#pref-link'), true);
-    await win.click('#pref-link-list button');
-    await win.waitForFunction(() => /Not linked/.test(document.getElementById('pref-link-list').textContent));
+    await win.click(`${row} button[aria-label="Remove the link to Stand-In App"]`);
+    await win.waitForSelector(`${row}[data-state="found"]`);          // still running, so still found (3.14's words)
+    assert.match(await win.textContent(row), /Found, not linked/);
     assert.equal(state.unlinked, true);
     await win.click('#prefs-done');
   });

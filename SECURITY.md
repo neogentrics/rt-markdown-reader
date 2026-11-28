@@ -242,6 +242,22 @@ Markdown files are treated as **untrusted input**:
 - **Claude Code** is run with `--tools ""`, without your settings or other connectors, and in a temporary folder. The
   document goes in on stdin. The app never sees or stores your Claude sign-in.
 
+### Your apps at a glance (since 3.14)
+
+- **The installed list.** An installed copy writes `installed/rt-markdown-reader.json` in the shared App Link folder: its name,
+  version and the path that starts it. No secrets. The Windows installer writes it and the uninstaller removes it.
+- **Other apps' files are untrusted.** Any program running as you could write one. Reader starts a program only when you press
+  **Open**, only for an id in its own list of Recon Towers apps, only if the path is a real program on this computer (a path to
+  another computer, such as `\\server\share`, is not even looked at), with no arguments and no shell. The page never receives
+  the paths, or any link key.
+- **Web pages** opened by *Get it* and *Download* come from Reader's own list, or from the versions file if it is an `https`
+  page on `recontowers.com`.
+- **The versions check** is a plain `GET` of `https://recontowers.com/apps/versions.json`, made only when the apps list is opened
+  or refreshed (never at startup or on a timer), at most once a day: no query, no identifiers, no cookies, nothing about what's
+  installed. The answer is size-limited, and only version numbers and pages on that site are kept.
+- **`status`** is answered only to a linked app with its key, with at most the file name of the saved document in front. A
+  password-locked or unsaved document answers `idle`. Text another app sends is only ever shown as text.
+
 ### AI assist (since 2.0; more services since 3.3)
 
 - Off by default. Requests are made only from an explicit menu command and contain only the current

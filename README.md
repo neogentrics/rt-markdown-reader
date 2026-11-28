@@ -65,6 +65,7 @@ The builds aren't code-signed yet, so Windows may show a SmartScreen warning the
 | **Image viewer & rich copy** | Click any image to see it full size and zoom in; *Copy as Formatted Text* pastes into Word or email with formatting |
 | **Automatic updates** | The installed app downloads new versions; *Restart to update* installs them without any installer screens |
 | **Listen & speak** *(new in 3.5)* | Export a document as an MP3 or an audiobook with chapters, dictate instead of typing, read aloud through your slides, teach the voices how to say names, and choose your speakers and microphone ([details](#listen--speak)) |
+| **Your apps at a glance** *(new in 3.14)* | A toolbar button shows which other Recon Towers apps are linked, open, installed or missing, with a button to open, link or get each one. Finding an app never links it. |
 | **Linked apps** *(new in 3.6)* | Link other Recon Towers apps on your computer and send documents between them, with their pictures and no accounts. *Send to StoryTracker* works with no link at all ([details](help/09-sync.md)) |
 | **Automations** *(3.7)* | Send documents to n8n, Make, Zapier, Home Assistant or your own script, and get the answer back as a document or a change ([details](help/07-ai.md)) |
 | **Notion** *(3.8)* | Bring Notion pages in as Markdown and databases as tables, send documents back with only your changes, and see when a linked page has moved on ([details](docs/notion.md)). |

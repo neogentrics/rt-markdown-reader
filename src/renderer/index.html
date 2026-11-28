@@ -46,6 +46,7 @@
       <button class="tb-btn" id="btn-print" title="Print (Ctrl+P)" aria-label="Print"><svg viewBox="0 0 24 24"><path d="M7 9V3h10v6M7 18H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M7 14h10v7H7z"/></svg></button>
       <button class="tb-btn" id="btn-prefs" title="Preferences (Ctrl+,)" aria-label="Preferences"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg></button>
       <button class="tb-btn" id="btn-help" title="Help Center (F1)" aria-label="Help Center"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.6 2.2c-.8.4-1.1 1-1.1 1.8M12 17h.01"/></svg></button>
+      <button class="tb-btn tb-apps" id="btn-apps" title="Recon Towers apps" aria-label="Recon Towers apps"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg><span class="apps-dot" aria-hidden="true" data-dot="off"></span></button>
     </div>
   </header>
 
@@ -868,8 +869,9 @@ Term
         <section class="prefs-pane" data-pane="link" hidden>
           <label class="check"><input type="checkbox" id="pref-link"> Let other Recon Towers apps on this computer link with this app</label>
           <p class="hint-text">Linked apps can send each other documents. You approve each app once, and no account is needed.</p>
-          <ul class="link-list" id="pref-link-list"></ul>
-          <p class="hint-text" id="pref-link-status"></p>
+          <ul class="apps-list" id="pref-link-list"></ul>
+          <p class="hint-text" id="pref-link-status" role="status"></p>
+          <div class="prefs-actions"><button type="button" class="link-btn" id="pref-link-refresh">Refresh</button></div>
         </section>
         <section class="prefs-pane" data-pane="automate" hidden>
           <div class="pref-auto-buttons"><button type="button" class="big-btn sm" id="pref-auto-open">Manage Automations…</button><button type="button" class="big-btn sm" id="pref-notion-open">Notion Connection…</button><button type="button" class="big-btn sm" id="pref-servers-open">My Servers…</button></div>
@@ -972,6 +974,16 @@ Term
       <span class="spacer"></span>
       <button type="button" class="big-btn sm" id="keys-close">Done</button>
     </div>
+  </dialog>
+
+  <!-- Your apps at a glance (3.14): the same panel as Preferences → Linked Apps -->
+  <dialog class="shortcuts apps-dlg" id="apps-dlg" aria-labelledby="apps-h">
+    <div class="ai-head"><h3 id="apps-h" translate="no">Recon Towers apps</h3><button type="button" class="tb-btn sm" id="apps-close" title="Close" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <p class="hint-text">Finding an app never links it: you link once, and answer in the app being asked. A linked app can send you documents, and can see the file name of the one you have open. A locked document is never named or sent.</p>
+    <p class="apps-off" id="apps-off" role="status" hidden><span>App Link is off, so no other app can find this one and none can be linked.</span> <button type="button" class="link-btn" id="apps-turn-on">Turn on</button></p>
+    <ul class="apps-list" id="apps-list"></ul>
+    <p class="hint-text" id="apps-note" role="status"></p>
+    <div class="grants-actions"><button type="button" class="link-btn" id="apps-refresh">Refresh</button><button type="button" class="link-btn" id="apps-prefs">App Link Settings…</button><span class="spacer"></span><button type="button" class="big-btn sm" id="apps-done">Done</button></div>
   </dialog>
 
   <dialog class="shortcuts grants" id="grants">
