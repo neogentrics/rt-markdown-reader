@@ -45,7 +45,7 @@ major version, 4.0, is kept for a change to what the app is: the writing studio.
 | [v3.10](#v310--publish-anywhere) | Publish anywhere | ✅ Released ([3.10.0](https://github.com/neogentrics/rt-markdown-reader/releases/tag/v3.10.0)) |
 | [v3.11](#v311--working-with-rt-story-tracker) | Working with RT Story Tracker | ✅ Released ([3.11.0](https://github.com/neogentrics/rt-markdown-reader/releases/tag/v3.11.0)) |
 | [v3.12](#v312--warmer-livelier-voices) | Warmer, livelier voices | ✅ Released ([3.12.0](https://github.com/neogentrics/rt-markdown-reader/releases/tag/v3.12.0)) |
-| [v3.13](#v313--metallic-finish) | Metallic finish | ✅ Released ([3.13.0](https://github.com/neogentrics/rt-markdown-reader/releases/tag/v3.13.0)) · 🔨 3.13.1 in review |
+| [v3.13](#v313--metallic-finish) | Metallic finish | ✅ Released ([3.13.0](https://github.com/neogentrics/rt-markdown-reader/releases/tag/v3.13.0)) · ✅ [3.13.1](https://github.com/neogentrics/rt-markdown-reader/releases/tag/v3.13.1) |
 | [v3.14](#v314--your-apps-at-a-glance) | Your apps at a glance | Planned |
 | [v3.15](#v315--writing-patterns) | Writing patterns | Planned |
 | [v4.0](#v40--writing-studio) | Writing studio | Planned |
@@ -347,7 +347,7 @@ Metallic is layered gradients, not blur: a light highlight along the top, a dark
 | ✅ How it's written | S | In its own `styles/metallic.css`, under `:root[data-surface="metallic"]`, with no `!important`. The strength of each layer (highlight, band, edge, shadow) is worked out from the lightness of the text on that surface, so Paper gets a soft sheen instead of a dark band, and Sepia, Blue and Red, whose toolbar is dark under a light page, get the right one too. Customize Theme colours work too, because the layers sit over whatever panel colour is chosen. |
 | ✅ 🛡️ Contrast test | M | The accessibility test can't check this as it stands. Axe, the checker it uses, gives up on text over a gradient ("needs review") and the test counts that as a pass, so a Metallic theme could pass while its text is unreadable. The new check (`test/e2e/metallic.e2e.cjs`) hides the text, takes a picture of the window, looks at the background behind each control's own words or icon, finds the lightest and darkest background in it, and tests the real text colour against both (4.5:1 for text, 3:1 for icons). It runs for all ten themes in Metallic, plus a Customize Theme example, and confirms High Contrast and forced colours are still flat. The accessibility test now runs Glass and Metallic on all ten themes (Glass was four). A deliberate-failure case proves the check catches a finish that's too bright. |
 
-**3.13.1, richer Metallic and Glass** (🙋 asked for on 2026-11-26 after comparing the two installed apps side by side; 🔨 built, waiting for review and release):
+**3.13.1, richer Metallic and Glass** (🙋 asked for on 2026-11-26 after comparing the two installed apps side by side; ✅ released in [3.13.1](https://github.com/neogentrics/rt-markdown-reader/releases/tag/v3.13.1)):
 
 | Feature | Size | Details |
 |---|:-:|---|
