@@ -22,7 +22,7 @@ test('the Look can be picked everywhere a theme can: the theme button, Preferenc
 });
 
 test('the Metallic stylesheet steps aside for High Contrast, forced colours and a request for more contrast, and never touches the page or the editor', () => {
-  const css = fs.readFileSync(new URL('../src/renderer/styles/metallic.css', import.meta.url), 'utf8');
+  const css = fs.readFileSync(new URL('../src/renderer/shared/theme/metallic.css', import.meta.url), 'utf8');
   assert.match(css, /@media screen and \(forced-colors: none\) and \(prefers-contrast: no-preference\)/, 'screen only, and not with forced colours or more contrast');
   assert.ok(!/!important/.test(css), 'no !important: it wins by specificity, so a theme or brand colour can still override it');
   // Every rule is for the Metallic look and not for High Contrast.
@@ -44,7 +44,7 @@ test('the Metallic stylesheet steps aside for High Contrast, forced colours and 
 });
 
 test('the Glass stylesheet steps aside in the same cases, and for less transparency, and puts no sheen on the page or the editor', () => {
-  const css = fs.readFileSync(new URL('../src/renderer/styles/glass.css', import.meta.url), 'utf8');
+  const css = fs.readFileSync(new URL('../src/renderer/shared/theme/glass.css', import.meta.url), 'utf8');
   assert.match(css, /@media screen and \(prefers-reduced-transparency: no-preference\) and \(forced-colors: none\) and \(prefers-contrast: no-preference\)/);
   assert.ok(!/!important/.test(css));
   const selectors = [...css.matchAll(/^\s*(:root\[data-surface="glass"\][^{]*)\{/gm)].map((m) => m[1]);
@@ -57,5 +57,5 @@ test('the Glass stylesheet steps aside in the same cases, and for less transpare
     const line = css.split('\n').find((l) => l.trim().startsWith(`${name}:`));
     assert.match(line || '', /oklch\(from var\(--g-ink\) [^/]+\/ clamp\(/, `${name} comes from the text's lightness, within limits`);
   }
-  assert.match(fs.readFileSync(new URL('../src/renderer/styles/app.css', import.meta.url), 'utf8'), /@import '\.\/glass\.css';/);
+  assert.match(fs.readFileSync(new URL('../src/renderer/styles/app.css', import.meta.url), 'utf8'), /@import '\.\.\/shared\/theme\/glass\.css';/);
 });

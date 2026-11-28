@@ -2,17 +2,24 @@
 
 One place that says how themes are supposed to look, so a new app is built to it and nobody has to explain it again. It is part of [app-suite.md](app-suite.md). Last checked against the code on 2026-11-27.
 
-**Copy, don't invent.** RT Markdown Reader is the reference for themes, tokens, contrast and the Settings. Recon Browser's Metallic and Glass finish is the one the owner likes best, and Reader's two looks were brought closer to it in 3.13.1. **Reader's files are now the reference for both looks**, and Recon Browser is moved to the same names. One difference will show when it moves: Recon Browser's exact shading for Metallic dialogs is readable in Reader's Night, Forest and Dusk themes, but not in the six with light dialogs (Paper, Sepia, Mist, Blue, Red and Yellow), where small text in Preferences fell as low as 3.36:1 (it needs 4.5:1). Light dialogs are gentler in Reader, so Recon Browser's will get softer.
+**Copy, don't invent.** RT Markdown Reader is the reference for themes, tokens, contrast and the Settings. Recon Browser's Metallic and Glass finish is the one the owner likes best, and Reader's two looks were brought closer to it in 3.13.1. **Reader's looks are now the reference for both**, and their files are shared with every app through `recon-theme`. Recon Browser is moved to the same names. One difference will show when it moves: Recon Browser's exact shading for Metallic dialogs is readable in Reader's Night, Forest and Dusk themes, but not in the six with light dialogs (Paper, Sepia, Mist, Blue, Red and Yellow), where small text in Preferences fell as low as 3.36:1 (it needs 4.5:1). Light dialogs are gentler in Reader, so Recon Browser's will get softer.
 
-Reader's files:
+**The shared files** live in the `theme/` folder of `recon-theme`, whose `theme/README.md` says how an app uses them. Reader takes them in at a pinned tag, into `src/renderer/shared/theme/`. **Never edit that copy:** change the files in `recon-theme`, tag them, and run `node scripts/theme-sync.mjs <tag>`.
 
-| File | What's in it |
+| Shared file | What's in it |
 |---|---|
-| `src/renderer/styles/theme.css` | The themes and their tokens, and the shared defaults |
-| `src/renderer/styles/glass.css` | Glass |
-| `src/renderer/styles/metallic.css` | Metallic |
-| `src/renderer/styles/app.css` | Loads them: `theme.css` first, then `glass.css`, then `metallic.css` (with the other stylesheets between and around them) |
-| `src/renderer/brand.js` | *Customize Theme*: the person's own colours and fonts, and how each look treats them |
+| `theme.css` | The themes and their tokens, and the shared defaults |
+| `glass.css` | Glass |
+| `metallic.css` | Metallic |
+| `brand.js` | *Customize Theme*: the person's own colours and fonts, and how each look treats them |
+
+In Reader:
+
+| File | What it does |
+|---|---|
+| `src/renderer/styles/app.css` | Loads them: `theme.css` first, then `glass.css`, then `metallic.css` (with Reader's own stylesheets between and around them) |
+| `theme.lock`, `scripts/theme-sync.mjs` | The tag Reader has, with a hash of every file, and the script that takes a tag in |
+| `test/theme.test.mjs` | Fails if the copy was edited, is missing a file or has an extra one, or if the app stops loading it |
 | `test/colors.test.mjs` | The contrast of every panel in every theme except High Contrast, colour-safe colours, and *Customize Theme* colours |
 | `test/surface.test.mjs` | What the two look stylesheets promise that can be checked without a screen: when they step aside, no `!important`, nothing on the editor, every layer worked out from the text's lightness |
 | `test/e2e/metallic.e2e.cjs` | The contrast of real text over both Metallic and Glass |
@@ -104,7 +111,7 @@ The real-text test (`metallic.e2e.cjs`) runs both Metallic and Glass in the nine
 
 ## A new app starts here
 
-1. Copy Reader's `theme.css` (the themes **and** the shared defaults), `glass.css` and `metallic.css`, loaded in that order, set the four attributes above, and handle custom colours as `brand.js` does.
+1. Take in `recon-theme` at a tag with a copy script and a lock (start from Reader's `scripts/theme-sync.mjs`, the `scripts/core-sync.mjs` it uses, and `test/theme.test.mjs`). Load `theme.css` (all of it: the themes **and** the shared defaults), then the app's own base styles, then `glass.css` and `metallic.css`; set the four attributes above; use the class names listed in `recon-theme`'s `theme/README.md`, since a part with another name gets no finish; and apply custom colours with `brand.js`.
 2. Add the theme button and the Appearance section with the same labels.
 3. Add the colour tests (panel contrast per theme), the stylesheet tests (`surface.test.mjs`) and the look test (real text over each look, per theme), adapted to the app's own screens.
 4. Say in the app's roadmap which pieces it left out and why.
@@ -121,5 +128,5 @@ The shared set is the ten themes above plus themes that apps add to it. RT Autho
 
 ## Still to settle
 
-- **Where the shared file lives: settled.** A private repo, `neogentrics/recon-theme`, created on 2026-11-27 by the owner's say-so. It holds the tokens, the themes, the looks and the contrast tests, with a version tag per release. Private is enough because it is only for the Recon apps; the apps' own source (some of it public) carries a committed copy anyway. An app takes it in with a script that copies the files at a pinned tag and writes a `theme.lock` (a hash of the copied files); the app commits both, so building the app never needs access to the private repo, and the app's test recomputes the hash and fails if the copy was edited by hand or no longer matches the lock. Reader's Metallic and Glass update is released (3.13.1), and the files move in after read aloud has moved to `recon-core`, starting from Reader as it is then (the repository's own roadmap calls that v0.1.0). Until then it has no theme files, and new apps keep copying Reader's.
+- **Where the shared file lives: settled.** A private repo, `neogentrics/recon-theme`, created on 2026-11-27 by the owner's say-so. It holds the tokens, the themes, the looks and contrast tests that run on their own (each app also keeps tests that run against its copy), with a version tag per release. Private is enough because it is only for the Recon apps; the apps' own source (some of it public) carries a committed copy anyway. An app takes it in with a script that copies the files at a pinned tag and writes a `theme.lock` (a hash of the copied files); the app commits both, so building the app never needs access to the private repo, and the app's test recomputes the hash and fails if the copy was edited by hand or no longer matches the lock. The first files moved in from Reader 3.13.1, unchanged, as **v0.1.0** (2026-11-27), and Reader takes them back in from there. New apps take the theme from `recon-theme`.
 - **The App Link addition for following,** and where in the App Link folder the shared themes are stored. Decided together with the `kinds` change, which is already in RT Story Tracker 3.11.

@@ -47,7 +47,7 @@ Which app owns which *feature* is in [app-features.md](app-features.md).
 | Read-aloud screens, audio export, pronunciation list | Reader: `renderer/read-ui.js`, `renderer/audio-ui.js`, `renderer/m4b.js`, `pronounce.js` |
 | Dictation and speech to text | Reader: `whisper.js`, `dictation.js` |
 | AI services, including local models | Reader: `ai-providers.js` |
-| Themes and fonts | Reader, and `src/shared/themes.js` in Story Tracker |
+| Themes, looks and fonts | **Shared:** `theme/` in `recon-theme`. Reader takes it in at a pinned tag, into `src/renderer/shared/theme/` (`scripts/theme-sync.mjs`, `theme.lock`; `test/theme.test.mjs` fails if a copy is changed here). Story Tracker has its own `src/shared/themes.js` today |
 | Book layouts, EPUB | Story Tracker |
 
 ## Still to add: finding apps that are installed
