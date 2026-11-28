@@ -4,7 +4,15 @@ All notable changes to RT Markdown Reader (Neo Markdown Reader until 3.4.1) are 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [3.14.0] - Unreleased
+
+Your apps at a glance.
+
+### Added
+- **Your apps at a glance.** A button at the right end of the toolbar (also *View → Recon Towers Apps…*, and *Preferences → Linked Apps*) lists every Recon Towers app as **Linked**, **Found, not linked**, **Installed, not running** or **Not installed**, with a button to **Open**, **Link** or **Get it**. Its dot is green, amber or grey, or an empty ring when App Link is off, where the list offers to turn it on. Finding an app never links it. A linked app that's open shows a short line about what it's doing. The list looks when it's opened, when you press **Refresh** and when a link changes, never on a timer. It matches the panel in RT Story Tracker.
+- **The installed list**, so apps are found while they're closed. Reader says it's installed in `installed/rt-markdown-reader.json` in the App Link folder (the Windows installer writes it and the uninstaller removes it), and reads the others'. It only ever starts an app from the suite's list, when you press **Open**.
+- **Newer versions.** When the Recon Towers site publishes its list of latest versions, the panel shows **Update available** with both numbers. It's asked for only when the list is open, at most once a day, with nothing about you in the request. Whether two apps can link depends on their App Link versions, never their own.
+- **App Link:** a linked app can ask Reader's `status`. It learns only the file name of the saved document in front, that Reader is exporting audio, or nothing (for a locked or unsaved document). `hello` now says `minProtocol`.
 
 ### Changed
 - **Read aloud's engine is now shared code.** The five files that download the natural voices and make speech moved, unchanged, into `recon-core`, a module the Recon Towers apps share, so another app can use the same engine. Reader takes them back in at a tag, into `src/main/core/read-aloud/`. `core.lock` records the tag and a hash of every file, and a test fails if a copy is changed here; to change them, change them in `recon-core`, tag it, and run `node scripts/core-sync.mjs <tag>`. Building and testing Reader need no access to that repository. Nothing about reading aloud changes.

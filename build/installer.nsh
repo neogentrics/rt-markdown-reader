@@ -33,6 +33,53 @@
   Pop $R9
 !macroend
 
+;
+; The installed list (3.14): says Reader is installed, so the other Recon Towers apps can find it before it has ever been
+; opened, and takes that back when it's uninstalled. The file holds no secrets: the app's id, name, version and where it
+; starts. The app writes the same file itself each time it runs (src/main/installed.js, docs/app-link.md).
+; Always in the folder of the person installing, also when installing for everyone; the others get theirs when they first
+; open it. A path with letters outside the computer's own code page is put right by that first run too.
+!ifndef BUILD_UNINSTALLER
+; The path with / for \, because a backslash in JSON has to be doubled and Windows reads a forward slash just as well.
+Function NmrSlashes
+  StrCpy $R4 ""
+  StrCpy $R5 0
+  nmrSlashLoop:
+    StrCpy $R6 $R3 1 $R5
+    StrCmp $R6 "" nmrSlashDone
+    StrCmp $R6 "\" 0 +2
+      StrCpy $R6 "/"
+    StrCpy $R4 "$R4$R6"
+    IntOp $R5 $R5 + 1
+    Goto nmrSlashLoop
+  nmrSlashDone:
+FunctionEnd
+!endif
+
+!macro NmrWriteInstalled
+  SetShellVarContext current
+  CreateDirectory "$APPDATA\Recon Towers\app-link\installed"
+  StrCpy $R3 "$INSTDIR\${APP_EXECUTABLE_FILENAME}"
+  Call NmrSlashes
+  ClearErrors
+  FileOpen $R7 "$APPDATA\Recon Towers\app-link\installed\rt-markdown-reader.json" w
+  ${IfNot} ${Errors}
+    FileWrite $R7 '{$\r$\n  "id": "rt-markdown-reader",$\r$\n  "name": "RT Markdown Reader",$\r$\n  "version": "${VERSION}",$\r$\n  "launch": "$R4",$\r$\n  "protocol": 1$\r$\n}$\r$\n'
+    FileClose $R7
+  ${EndIf}
+  ${If} $installMode == "all"
+    SetShellVarContext all
+  ${EndIf}
+!macroend
+
+!macro NmrRemoveInstalled
+  SetShellVarContext current
+  Delete "$APPDATA\Recon Towers\app-link\installed\rt-markdown-reader.json"
+  ${If} $installMode == "all"
+    SetShellVarContext all
+  ${EndIf}
+!macroend
+
 !macro customInit
   !insertmacro NmrStopPreviewHost
 !macroend
@@ -42,6 +89,8 @@
 !macroend
 
 !macro customInstall
+  !insertmacro NmrWriteInstalled
+
   ; Windows starts the handler through NeoMarkdownPreviewShim.dll, a small native COM server that
   ; loads the C# handler (NeoMarkdownPreview.dll, next to it) into the .NET Framework built into Windows.
   ${If} ${FileExists} "$INSTDIR\resources\preview\NeoMarkdownPreviewShim.dll"
@@ -66,6 +115,7 @@
 !macroend
 
 !macro customUnInstall
+  !insertmacro NmrRemoveInstalled
   !insertmacro NmrPreviewUnlinkExt ".md"
   !insertmacro NmrPreviewUnlinkExt ".markdown"
   !insertmacro NmrPreviewUnlinkExt ".mdown"

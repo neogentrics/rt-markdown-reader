@@ -6,7 +6,7 @@ import { cleanReading } from '../main/core/read-aloud/voice-tone.js';
 
 const $ = (id) => document.getElementById(id);
 
-export function createPrefsUi({ api, settings, toast, refreshVoices, openHelp }) {
+export function createPrefsUi({ api, settings, toast, refreshVoices, openHelp, showApps }) {
   const dlg = $('prefs-dlg');
   const tabs = [...dlg.querySelectorAll('.prefs-nav button')];
   const panes = [...dlg.querySelectorAll('.prefs-pane')];
@@ -16,6 +16,8 @@ export function createPrefsUi({ api, settings, toast, refreshVoices, openHelp })
     const name = panes.some((p) => p.dataset.pane === pane) ? pane : 'general';
     for (const t of tabs) { const on = t.dataset.pane === name; t.classList.toggle('on', on); t.setAttribute('aria-selected', String(on)); }
     for (const p of panes) p.hidden = p.dataset.pane !== name;
+    // The Apps panel looks when it's opened, so only when its pane is on show (and after the window is).
+    if (name === 'link') queueMicrotask(() => showApps());
   }
 
   function paint() {
@@ -56,36 +58,6 @@ export function createPrefsUi({ api, settings, toast, refreshVoices, openHelp })
   $('pref-notion-open').onclick = () => { dlg.close(); api.runCommand('notion-setup'); };
   $('pref-servers-open').onclick = () => { dlg.close(); api.runCommand('server-list'); };
 
-  async function paintLink(given) {
-    const link = given || await api.linkStatus();
-    $('pref-link').checked = link.enabled;
-    const rows = link.apps.map((a) => {
-      const row = document.createElement('li');
-      const name = document.createElement('span');
-      name.textContent = a.name;
-      const state = document.createElement('small');
-      state.textContent = !a.linked ? 'Not linked' : a.running ? 'Linked' : 'Linked, not running';
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'link-btn';
-      button.textContent = a.linked ? 'Remove' : 'Link';
-      button.setAttribute('aria-label', `${a.linked ? 'Remove' : 'Link'} ${a.name}`);
-      button.onclick = async () => {
-        if (a.linked) { await paintLink(await api.linkUnlink(a.id)); return; }
-        toast(`Answer in ${a.name}`);
-        const res = await api.linkPair(a.id);
-        if (res?.error) toast(res.error);
-        paintLink();
-      };
-      row.append(name, state, button);
-      return row;
-    });
-    $('pref-link-list').replaceChildren(...rows);
-    $('pref-link-status').textContent = !link.enabled ? ''
-      : !link.safe ? 'This computer has no safe place to keep links, so they last until the app closes.'
-        : rows.length ? '' : 'No other Recon Towers apps are running.';
-  }
-
   async function paintStatus() {
     const ai = await api.aiStatus();
     $('pref-ai-status').textContent = ai.enabled ? `AI assist is on, using ${ai.name}.` : 'AI assist is off.';
@@ -101,7 +73,6 @@ export function createPrefsUi({ api, settings, toast, refreshVoices, openHelp })
     refreshVoices();
     paint();
     paintStatus();
-    paintLink();
     show(pane);
     if (!dlg.open) dlg.showModal();
   }
@@ -117,11 +88,6 @@ export function createPrefsUi({ api, settings, toast, refreshVoices, openHelp })
   $('pref-colorsafe').addEventListener('change', () => api.setSettings({ colorSafe: $('pref-colorsafe').checked }));
   $('pref-restore').addEventListener('change', () => api.setSettings({ restoreSession: $('pref-restore').checked }));
   $('pref-menubar').addEventListener('change', () => api.setSettings({ showMenuBar: $('pref-menubar').checked }));
-  $('pref-link').addEventListener('change', async () => {
-    const res = await api.linkSet($('pref-link').checked);
-    if (res.error) toast(res.error);
-    paintLink(res);
-  });
   $('pref-wiki').addEventListener('change', () => run('wiki-style'));
   $('pref-run').addEventListener('change', () => run('allow-run'));
   $('pref-smaller').onclick = () => api.setSettings({ fontScale: settings().fontScale - 0.1 });

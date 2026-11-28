@@ -8,6 +8,8 @@ const net = require('node:net');
 const path = require('node:path');
 
 const PROTOCOL = 1;
+const MIN_PROTOCOL = 1;           // the oldest protocol this app still links with; raised only for a security fix
+const STATES = ['idle', 'open', 'busy'];
 const APP_ID = 'rt-markdown-reader';
 const APP_NAME = 'RT Markdown Reader';
 const ACCEPTS = ['markdown', 'text'];
@@ -17,6 +19,7 @@ const CALL_MS = 5_000;
 const DECLINED_MS = 30_000;       // an app that's been told no can't keep asking
 
 const validId = (id) => typeof id === 'string' && /^[a-z0-9][a-z0-9-]{0,63}$/.test(id);
+const protocolNumber = (n) => (Number.isInteger(n) && n >= 1 && n <= 1000 ? n : 0);
 
 /** A refusal with a reason other apps can act on. */
 class LinkError extends Error {
@@ -96,9 +99,10 @@ class AppLink {
    * @param {(links: object) => void} o.save
    * @param {(asker: { id, name }) => Promise<boolean>} o.ask
    * @param {(doc: { from, name, text, path, attachments, kind }) => Promise<void>} o.open
+   * @param {() => ({ state, line }|null)} [o.status]  what the app is doing, for a linked app: a short line, never any writing
    */
-  constructor({ folder, dataDir, version, load, save, ask, open, platform = process.platform }) {
-    Object.assign(this, { folder, dataDir, version, load, save, ask, open, platform });
+  constructor({ folder, dataDir, version, load, save, ask, open, status = null, platform = process.platform }) {
+    Object.assign(this, { folder, dataDir, version, load, save, ask, open, status, platform });
     this.server = null;
     this.asking = false;
     this.declined = new Map();
@@ -158,8 +162,9 @@ class AppLink {
   }
 
   handle(method, params) {
-    if (method === 'hello') return { protocol: PROTOCOL, app: APP_ID, name: APP_NAME, version: this.version, accepts: ACCEPTS };
+    if (method === 'hello') return { protocol: PROTOCOL, minProtocol: MIN_PROTOCOL, app: APP_ID, name: APP_NAME, version: this.version, accepts: ACCEPTS };
     if (method === 'pair') return this.pairRequest(params);
+    if (method === 'status') return this.statusRequest(params);
     if (method === 'open_document') return this.openRequest(params);
     if (method === 'unlink') return this.unlinkRequest(params);
     throw new LinkError('unknown_method', 'RT Markdown Reader doesn’t have that method.');
@@ -208,6 +213,15 @@ class AppLink {
     return { opened: true };
   }
 
+  // What this app is doing, for a linked app only. An app that has nothing to say, or mustn't, is idle with no line.
+  statusRequest(params) {
+    this.caller(params);
+    const answer = this.status ? this.status() : null;
+    const state = STATES.includes(answer?.state) ? answer.state : 'idle';
+    const line = state === 'idle' ? '' : cleanName(answer?.line);
+    return line ? { state, line } : { state };
+  }
+
   unlinkRequest(params) {
     const { id } = this.caller(params);
     const links = this.load();
@@ -225,9 +239,18 @@ class AppLink {
     const seen = await Promise.all(names.filter((n) => n.endsWith('.json') && n !== `${APP_ID}.json`).map(async (n) => {
       try {
         const info = JSON.parse(fs.readFileSync(path.join(this.folder, n), 'utf8'));
-        if (info?.protocol !== PROTOCOL || !validId(info.id) || `${info.id}.json` !== n || !validEndpoint(info.endpoint, this.platform)) return null;
-        await call(info.endpoint, 'hello', {}, 1500);
-        return { id: info.id, name: cleanName(info.name, info.id), endpoint: info.endpoint };
+        // A newer protocol is still listed, so the Apps panel can say which side needs an update.
+        if (!protocolNumber(info?.protocol) || !validId(info.id) || `${info.id}.json` !== n || !validEndpoint(info.endpoint, this.platform)) return null;
+        const hello = await call(info.endpoint, 'hello', {}, 1500);
+        return {
+          id: info.id,
+          name: cleanName(info.name, info.id),
+          endpoint: info.endpoint,
+          version: cleanName(String(hello?.version || info.version || '')),
+          protocol: protocolNumber(hello?.protocol) || info.protocol,
+          minProtocol: protocolNumber(hello?.minProtocol) || 1,
+          accepts: Array.isArray(hello?.accepts) ? hello.accepts.filter((k) => typeof k === 'string').slice(0, 20) : [],
+        };
       } catch { return null; }
     }));
     return seen.filter(Boolean);
@@ -251,7 +274,7 @@ class AppLink {
   /** Ask another app to link with this one. The person answers over there. */
   async pairWith(id) {
     const app = await this.reach(id);
-    const res = await call(app.endpoint, 'pair', { app: APP_ID, name: APP_NAME }, ASK_MS + 5000);
+    const res = await call(app.endpoint, 'pair', { app: APP_ID, name: APP_NAME, protocol: PROTOCOL, minProtocol: MIN_PROTOCOL, accepts: ACCEPTS }, ASK_MS + 5000);
     if (typeof res?.key !== 'string' || res.key.length < 32) throw new LinkError('failed', 'That app didn’t finish linking.');
     this.save({ ...this.load(), [id]: { name: app.name, key: res.key } });
     return { name: app.name };
@@ -264,6 +287,16 @@ class AppLink {
     const pictures = attachments.length ? { attachments } : {};
     await call(app.endpoint, 'open_document', { app: APP_ID, key: link.key, name: documentName(name), text, ...pictures }, 15_000);
     return { name: link.name };
+  }
+
+  /** What a linked app that's running says it's doing. One that doesn't know `status` answers with an error: it just says nothing. */
+  async statusOf(id, found = null) {
+    const link = this.load()[id];
+    if (!link) throw new LinkError('not_linked', 'That app isn’t linked.');
+    const app = found || await this.reach(id);
+    const answer = await call(app.endpoint, 'status', { app: APP_ID, key: link.key }, 2500);
+    const state = STATES.includes(answer?.state) ? answer.state : 'idle';
+    return { state, line: state === 'idle' ? '' : cleanName(answer?.line) };
   }
 
   /** Forget a link here, and tell the other app if it's there to hear it. */
@@ -280,4 +313,4 @@ class AppLink {
   }
 }
 
-module.exports = { AppLink, LinkError, PROTOCOL, APP_ID, sharedFolder, endpointFor, validEndpoint, validId, cleanName, documentName, call };
+module.exports = { AppLink, LinkError, PROTOCOL, MIN_PROTOCOL, ACCEPTS, APP_ID, APP_NAME, sharedFolder, endpointFor, validEndpoint, validId, cleanName, documentName, call };
